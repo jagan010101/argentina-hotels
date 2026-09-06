@@ -392,9 +392,7 @@ Give each category its *own* frontier and its *own* knee:
 
 ---
 
-## 10 · Why believe it
-
-### 10.1 Robustness (notebook 07)
+## 10 · Robustness (notebook 07)
 
 Re-run the whole pipeline under eight variations — GBA vs national CPI, room vs
 bed occupancy, all four β values, drop the most extreme inflation months,
@@ -415,48 +413,147 @@ real CPI path. The frozen price loses **−27%** of its real value; monthly
 indexing holds ~−3%; **the τ ≈ 6% rule fires ~10 times (vs 24 for indexing) and
 holds the real price within ~5% of target** — it does **not** break. But it is
 inflation-state-dependent only: **it has no branch that cuts the price when
-occupancy craters** (see §12).
-
-### 10.2 The kicker — the 6% is not a curve fit (notebook 06)
-
-The threshold has a **textbook origin**. In the **Sheshinski–Weiss (1977) /
-Barro (1972) menu-cost model**, a firm whose real price drifts down at the
-inflation rate π, pays a quadratic penalty for being off its target real price,
-and a fixed cost κ per price change, optimally follows an **(s, S) band**: let
-the real price erode by a width `w*`, then reset. The algebra gives
-
-    w* = (12 · κ · π / b)^(1/3)         reset every  T* = w*/π  months
-
-and the cumulative inflation between resets is **exactly `τ* = w*`**. In other
-words, **Policy P2 *is* the (s, S) rule**, and τ is the optimal band width.
-
-**Calibration.** The observed (deseasonalised) mean price-change size *identifies*
-`w*`, and it gives **τ\* ≈ 4.8% (1-2★), 5.8% (3★), 5.2% (4★), 9.3% (5★) — mean
-6.3%**, sitting right on the empirically fitted knee of 6% and inside the 4–7%
-penalty band (`11_chart10_model_vs_empirical.png`).
-
-**The model's sharp prediction, tested.** It says the **size** of price changes
-should scale with inflation to the power **1/3**, and the **frequency** to the
-power **2/3**:
-
-| margin | estimated inflation-elasticity (deciles / regimes / rolling) | model says |
-|---|---|---|
-| **size** of the move | **0.33 / 0.34 / 0.27** (CI [0.17, 0.49]) | **1/3** ✓ |
-| **frequency** of moves | 0.06 / 0.08 / 0.06 | 2/3 ✗ |
-
-> **The size margin obeys the menu-cost law almost exactly. The frequency margin
-> does not respond at all** — the structural echo of Finding 1. Frequency looks
-> flat because the reported rate is a monthly mean that already moves nearly
-> every month; there is no room for it to move "more often"
-> (`11_chart11_scaling_law.png`).
-
-**Closing the loop.** Feed each category's *model-calibrated* τ\* back through the
-backtest: 10–14 price changes and a 5.7–7.2% real-price gap — within a point of
-the data-derived τ = 6% result. **Theory and data land in the same place.**
+occupancy craters** (see §13).
 
 ---
 
-## 11 · The recommended rule (Chart 9)
+## 11 · The theory — why 6% is not an accident (notebook 06)
+
+Everything so far is empirical: τ ≈ 6% is where a fitted trade-off curve bends.
+This section shows the **same number falls out of a 50-year-old model** of
+pricing under inflation — and then tests that model's sharpest prediction against
+the data.
+
+### 11.1 The model — Sheshinski & Weiss (1977), Barro (1972)
+
+Set-up (in logs, real terms; the target real price is normalised to 0):
+
+* With the nominal price fixed, the firm's **real price `p` drifts down at the
+  inflation rate**: `dp/dt = −π`.
+* Being off the target real price carries a **flow loss** `L(p) = (b/2)·p²` — the
+  quadratic (second-order) approximation of *any* smooth revenue-or-profit
+  function near its peak; `b` is that function's curvature.
+* **Each price change costs a fixed `κ`** — the "menu cost": re-tagging,
+  re-listing on OTAs, staff time, customer/fairness friction.
+
+The firm can neither hold `p` at 0 (that needs continuous repricing at infinite
+cost) nor ignore it (the loss compounds). The optimal compromise is an
+**(s, S) band**: let the real price erode from an upper reset point `S` down to a
+lower trigger `s`, then jump the nominal price to put `p` back at `S`; repeat.
+Averaging both costs over one cycle,
+
+    C(w) = κ·π / w  +  (b / 24)·w²        band width  w = S − s
+
+(menu cost, paid π/w times per unit time, plus the mean quadratic loss inside a
+band of width `w`). Minimising over `w` gives `w* = (12·κ·π / b)^(1/3)`, and:
+
+| quantity | formula | scales with inflation as |
+|---|---|---|
+| optimal band width | `w* = (12·κ·π / b)^(1/3)` | **π^(1/3)** |
+| time between resets | `T* = w*/π` | π^(−2/3) |
+| repricing frequency | `f* = 1/T*` | **π^(2/3)** |
+| **cumulative inflation between resets** | **`τ* = w*`** | **π^(1/3)** |
+
+The last row is the point: **the cumulative inflation a firm optimally lets build
+up before repricing is exactly the band width `w*`.** "Reprice when cumulative
+inflation since the last change reaches τ" — **Policy P2** — *is* the
+Sheshinski–Weiss (s, S) rule, with `τ = w*`.
+
+### 11.2 One modification, and why
+
+In the original model the *target* real price is a monopoly optimum
+`p* = c·η/(η−1)`, which needs **elastic demand** (`η > 1`) and a **marginal cost
+`c`**. We have neither: no cost data, and §5 found demand **inelastic** (implied
+`η ≈ 0–0.6`), so there is no interior monopoly optimum to reset to.
+
+We therefore take the target real price **`p̄` as exogenous** — the hotel's
+*competitive / positioning benchmark* (what comparable hotels charge, what the
+OTA ranking rewards) — and let **`b` be the curvature of the penalty for
+deviating from it** (lost bookings + customer-fairness backlash + OTA-ranking
+demotion). This is the standard **reference-price / customer-market** treatment
+(Rotemberg 2005; Nakamura & Steinsson 2011). The (s, S) algebra above is
+**unchanged** — only the interpretation of the target and of `b` shifts.
+
+### 11.3 Calibrating the model (Table 8)
+
+Every reset in the model is exactly `w*` wide, so the **observed mean absolute
+log price change identifies `w*`** directly, and `κ/b = w*³ / (12·π̄)` (in
+months). Two versions:
+
+| calibration | `w*` = | note |
+|---|---|---|
+| raw | mean of \|Δln P\| | an **upper bound** — inflated by ordinary seasonal moves |
+| deseasonalised | mean of \|Δln P − monthly mean\| | strips calendar effects — the one to use |
+
+Model-implied `τ* = w*`:
+
+| category | raw τ\* | **deseasonalised τ\*** | reset interval T\* |
+|---|---|---|---|
+| 1-2★ | 6.8% | **4.8%** | ~0.9 mo |
+| 3★ | 7.9% | **5.8%** | ~1.1 mo |
+| 4★ | 7.6% | **5.2%** | ~1.0 mo |
+| 5★ | 10.7% | **9.3%** | ~1.7 mo |
+| **mean** | 8.2% | **6.3%** | — |
+
+The deseasonalised mean, **6.3%**, lands **on the empirically fitted knee (6%)**
+and inside the λ-penalty band (4–7%) — `11_chart10_model_vs_empirical.png`. Only
+the *ratio* `κ/b` is identified (≈ 0.0002–0.0012 months), not `κ` and `b`
+separately; pinning `κ` at a literature-plausible ~2% of monthly revenue implies
+a loss curvature `b ≈ 15–115` — a steep penalty for off-market real pricing,
+consistent with a competitive, OTA-mediated market.
+
+### 11.4 Testing the sharp prediction — the scaling law (Table 9)
+
+The calibration only used the *average* move. The model's real content is the
+**exponents**: price-change **size** should have an inflation-elasticity of
+**1/3**, and **frequency** an elasticity of **2/3**. Estimated three independent
+ways — across inflation *deciles*, across the three *regimes*, and on *12-month
+rolling windows* (HAC SE), pooled over the four star tiers:
+
+| margin | deciles | regimes | rolling | **model** |
+|---|---|---|---|---|
+| **size** of the move (elasticity to inflation) | **0.334** — CI [0.17, 0.49] | **0.337** | **0.269** | **0.333** |
+| **frequency** of moves (elasticity to inflation) | 0.062 | 0.076 | 0.061 | 0.667 |
+
+> **Theoretical finding.** The **size** margin obeys the menu-cost scaling law
+> almost exactly — inflation-elasticity ≈ 1/3 across every method. The
+> **frequency** margin is flat (≈ 0, not 2/3). This is the *structural*
+> counterpart of Finding 1: inflation is absorbed by **bigger** price changes,
+> not **more frequent** ones. The frequency prediction fails for a measurement
+> reason — the reported rate is a monthly mean that already moves nearly every
+> month, so there is no slack on the frequency margin
+> (`11_chart11_scaling_law.png`).
+
+### 11.5 Closing the loop (Table 10)
+
+Feed each category's **model-calibrated** τ\* (deseasonalised) back through the
+out-of-sample simulator:
+
+| | model-τ\* rule | empirical τ = 6% | observed |
+|---|---|---|---|
+| price changes | 10–14 | 14 | 25 |
+| mean real-price gap | 5.7–7.2% | ~5.8% | 10–15% |
+
+**The theory-derived and data-derived thresholds produce the same policy** — and
+both dominate what hotels actually did.
+
+### 11.6 What the model assumes (and where it is thin)
+
+1. **Deterministic drift.** The (s, S) formula assumes a *constant* inflation
+   rate. Argentine inflation moved sharply in 2023–24; the regime and
+   rolling-window versions of the scaling test partly absorb this, but the point
+   calibration is at the sample-mean rate.
+2. **Only `κ/b` is identified**, not the menu cost `κ` and the loss curvature `b`
+   separately.
+3. **Raw `w*` is inflated by seasonality** — the raw τ\* is an upper bound; the
+   deseasonalised calibration is the headline.
+4. **Exogenous target price, aggregate data.** `p̄` is a competitive benchmark,
+   not derived; and this is category-level data, so the result is a *category
+   pricing policy*, not a firm-level menu-cost estimate.
+
+---
+
+## 12 · The recommended rule (Chart 9)
 
 > **Each month, add up CPI inflation since your last price change (`CUMINF`).**
 >
@@ -483,7 +580,7 @@ increment) earns its keep.
 
 ---
 
-## 12 · What this does **not** do
+## 13 · What this does **not** do
 
 1. **Aggregate data.** City × category × month — this is a *category-level*
    pricing policy, not individual-hotel yield management.
@@ -496,7 +593,7 @@ increment) earns its keep.
    number would need a supply/cost instrument this data does not provide.
 4. **No marginal-cost data.** This is a revenue / real-price **trade-off** study,
    not profit maximisation. The constant-elasticity revenue "optimum" is
-   degenerate and is not used. In the menu-cost calibration (§10.2) only the
+   degenerate and is not used. In the menu-cost calibration (§11.3) only the
    *ratio* κ/b (fixed cost ÷ loss curvature, ≈ 0.0002–0.0012 months) is
    identified, not κ and b separately; a literature-plausible menu cost of ~2% of
    monthly revenue implies a loss curvature b ≈ 20–100 — a steep penalty for
@@ -523,7 +620,7 @@ increment) earns its keep.
 
 ---
 
-## 13 · Reproduce it
+## 14 · Reproduce it
 
 ```bash
 python3.12 -m venv .venv && source .venv/bin/activate

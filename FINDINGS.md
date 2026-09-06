@@ -90,14 +90,29 @@ at a similar or lower change count.
 
 ### A menu-cost (s, S) foundation (notebook 06)
 
-The trigger is the canonical **Sheshinski–Weiss (1977)** menu-cost rule: an
-(s, S) band of width `w* = (12·κ·π/b)^{1/3}`, repriced when cumulative inflation
-reaches τ = w\*. Calibrated to the observed (deseasonalised) price-change size it
+**The model.** A firm whose real price drifts down at the inflation rate π, pays
+a quadratic loss `L(p) = (b/2)·p²` for being off its target real price, and a
+fixed cost κ per price change, minimises cost per unit time
+`C(w) = κ·π/w + (b/24)·w²` by following an **(s, S) band** of width
+`w* = (12·κ·π/b)^{1/3}`, resetting when cumulative inflation reaches **τ = w\***.
+So Policy P2 *is* the Sheshinski–Weiss (1977) / Barro (1972) rule.
+The scaling exponents are `w*, τ* ∝ π^{1/3}` and `frequency ∝ π^{2/3}`.
+
+**One modification.** The original model's target is a monopoly optimum
+`p* = c·η/(η−1)`, which needs elastic demand and marginal cost — we have neither
+(§3). We take the target real price as an **exogenous competitive benchmark** and
+`b` as the curvature of the off-benchmark penalty (lost bookings + fairness +
+OTA-ranking). Standard reference-price treatment (Rotemberg 2005; Nakamura &
+Steinsson 2011); the (s, S) algebra is unchanged.
+
+**Fit.** Calibrated to the observed (deseasonalised) price-change size the model
 predicts **τ\* ≈ 6.3%** (4.8–9.3% by tier) — matching the fitted knee. Its sharp
-prediction that price-change **size ∝ π^{1/3}** holds in the data almost exactly
-(estimated inflation-elasticity **0.33**, CI [0.17, 0.49]); the companion
-prediction that **frequency ∝ π^{2/3}** is rejected (elasticity ≈ 0). Inflation
-is absorbed on the size margin — the structural version of §2.
+prediction that price-change **size ∝ π^{1/3}** holds almost exactly (estimated
+inflation-elasticity **0.33**, CI [0.17, 0.49]); the companion prediction that
+**frequency ∝ π^{2/3}** is **rejected** (elasticity ≈ 0). Inflation is absorbed
+on the size margin — the structural version of §2. Feeding each category's
+model-calibrated τ\* back through the backtest reproduces the τ = 6% result
+(10–14 changes, 5.7–7.2% real-price gap).
 
 ## 6 · Out-of-sample backtest (train 2018-19 + 2022 · validate 2023 · test 2024-01…2026-05)
 
