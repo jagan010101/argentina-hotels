@@ -1,0 +1,9 @@
+model,term,coef,t,p
+magnitude |dlnP| (pp),mid,-1.1968,-1.28,0.2
+magnitude |dlnP| (pp),high,3.7924,3.25,0.0012
+asymmetry P(up) (LPM),mid,0.0572,1.04,0.3
+asymmetry P(up) (LPM),high,0.2231,4.42,0.0
+frequency P(|dlnP|>1%) (LPM),mid,0.0225,0.48,0.6303
+frequency P(|dlnP|>1%) (LPM),high,0.0993,2.58,0.0099
+pass-through (interacted),dln_cpi_gba:mid,0.5071,1.09,0.2768
+pass-through (interacted),dln_cpi_gba:high,0.9275,1.69,0.092

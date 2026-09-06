@@ -85,7 +85,7 @@ def simulate(policy: Policy,
              window: tuple[str, str],
              *,
              occ_norm: dict | None = None,
-             anchor_price: float | None = None,
+             anchor_real: float | None = None,
              rate_col: str = "average_rate",
              occ_col: str = "room_occupancy",
              cpi_col: str = "cpi_gba",
@@ -103,10 +103,11 @@ def simulate(policy: Policy,
     window : (start, end) inclusive month strings.
     occ_norm : calendar-month occupancy factors from `seasonal_occ_norm` on the
         TRAINING data. Required for policy3; ignored otherwise.
-    anchor_price : if given, the policy path starts here instead of at the first
-        observed rate. Pass `target_real * cpi_{anchor-1} / 100` to start every
-        policy at the same *real* level, so the comparison is about repricing
-        timing / stability rather than the starting price level.
+    anchor_real : if given, every policy starts at this *real* price level — the
+        nominal anchor is `anchor_real * cpi_{anchor-1} / 100`, computed at the
+        actual first observed month, so the comparison is about repricing timing
+        / stability rather than the starting price level. If omitted the path
+        starts at the first observed nominal rate.
 
     Returns
     -------
@@ -140,10 +141,12 @@ def simulate(policy: Policy,
         return pd.DataFrame()
     a = i_lo + int(anchor_candidates[0])
 
+    cpi_prev_a = cpi[a - 1] if a >= 1 and np.isfinite(cpi[a - 1]) else cpi[a]
     P = np.full(len(s), np.nan)
-    P[a] = float(anchor_price) if anchor_price is not None else p_obs[a]
+    P[a] = (float(anchor_real) * cpi_prev_a / 100.0
+            if anchor_real is not None else p_obs[a])
     last_reprice_i = a
-    cpi_at_last_reprice = cpi[a - 1] if a >= 1 and np.isfinite(cpi[a - 1]) else cpi[a]
+    cpi_at_last_reprice = cpi_prev_a
     reprice_flag = np.zeros(len(s), dtype=bool)
     reprice_flag[a] = True
     msr = np.zeros(len(s), dtype=float)
@@ -170,7 +173,13 @@ def simulate(policy: Policy,
 
         elif policy.kind in ("threshold", "threshold_occ"):
             if cum >= policy.tau:
-                base = P[last_reprice_i] * (cpi_known / cpi_at_last_reprice)   # restore real value
+                # restore the real price: to the target level if an anchor_real
+                # was supplied (removes any slow downward drift), else to the
+                # real price prevailing at the last repricing.
+                if anchor_real is not None:
+                    base = float(anchor_real) * cpi_known / 100.0
+                else:
+                    base = P[last_reprice_i] * (cpi_known / cpi_at_last_reprice)
                 if policy.kind == "threshold_occ":
                     lo = max(0, i - occ_lookback)
                     occ_trail = np.nanmean(occ_obs[lo:i])

@@ -1,0 +1,4 @@
+regime,n,cpi_mom_mean_pct,freq_change_gt_1pct,mean_abs_change_pct,median_abs_change_pct,share_up,mean_real_rate,mean_room_occ,passthrough_beta,passthrough_t
+low,92,2.314,0.88,7.359,5.565,0.652,1318.356,57.724,0.477,0.25
+mid,92,3.941,0.902,6.217,4.513,0.707,1526.623,59.145,2.818,3.06
+high,92,9.573,0.978,11.261,10.32,0.87,1610.877,63.825,0.663,3.9

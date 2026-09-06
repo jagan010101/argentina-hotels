@@ -1,0 +1,7 @@
+hotel_category,label,n,beta_contemp,se,t,r2,beta_cum_0_2
+apart,Apart-hotel,72,1.051,0.266,3.95,0.108,0.908
+boutique,Boutique,72,1.2,0.188,6.39,0.298,0.922
+stars_1_2,1-2 star,60,0.879,0.119,7.36,0.19,0.79
+stars_3,3 star,72,0.825,0.189,4.37,0.13,0.66
+stars_4,4 star,72,1.077,0.168,6.4,0.28,0.784
+stars_5,5 star,72,1.227,0.29,4.23,0.103,0.921
