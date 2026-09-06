@@ -1,27 +1,25 @@
 variable,definition,frequency,unit
 date,month (period start),monthly,date
-hotel_category,"canonical category key (stars_1_2 … boutique, totals)",—,str
-average_rate,"avg monthly room rate, nominal pesos (Ehoba_03a)",monthly,ARS
-room_occupancy,"rooms occupied / available, in month (Ehoba_02a)",monthly,% 0-100
-bed_occupancy,"beds occupied / available, in month (Ehoba_04)",monthly,% 0-100
+hotel_category,"canonical key: stars_1_2/3/4/5, apart, boutique, total_composite, …",—,str
+average_rate,"avg monthly room rate, nominal pesos (Ehoba_03a; composite = capacity-weighted)",monthly,ARS
+room_occupancy / bed_occupancy,rooms / beds occupied ÷ available (Ehoba_02a / _04),monthly,% 0-100
 travelers,"travellers hosted, hotel sector only (Ehoba_VA)",monthly,persons
-cpi_gba,"IPC Región GBA, Nivel general, base dic-2016=100 (primary)",monthly,index
-cpi_nac,"IPC Total nacional, Nivel general, base dic-2016=100 (robustness)",monthly,index
-cpi_resthot_gba,IPC GBA division 'Restaurantes y hoteles' (context only),monthly,index
+cpi_gba / cpi_nac,"IPC Región GBA / Total nacional, Nivel general, base dic-2016=100",monthly,index
+cpi_resthot_gba/_nac,IPC 'Restaurantes y hoteles' division (context only),monthly,index
 infl_mom_gba / _nac,100·(CPI_t/CPI_{t-1}-1),monthly,%
+infl_mom_gba_frac / _nac_frac,"same, FRACTION units (used by src/policies.py)",monthly,frac
 infl_yoy_gba / _nac,100·(CPI_t/CPI_{t-12}-1),monthly,%
 "cum_infl_{geo}_{3,6,12}m",trailing compounded cumulative inflation,monthly,%
-real_rate_gba / _nac,average_rate / cpi × 100 (constant dic-2016 pesos),monthly,ARS const
-"month, year, t","calendar month, year, months since 2016-12 (t=0)",monthly,int
+real_rate_gba / _nac,average_rate ÷ cpi × 100 (constant dic-2016 pesos),monthly,ARS const
+revpar_gba / real_revpar_gba,"average_rate × room_occ/100 (RevPAR proxy), nominal / real",monthly,ARS
+"month, year, t","calendar month, year, months since 2018-01",monthly,num
 m02 … m12,calendar-month dummies (Jan = base),monthly,0/1
-covid_hole,2020-03 … 2021-12 (category detail unavailable),monthly,0/1
-covid_recovery,2022 (degraded: 1-2★ missing),monthly,0/1
-covid_any,covid_hole OR covid_recovery,monthly,0/1
-*_asof,nearest PRIOR quarterly capacity snapshot (Ehoba_1_ano),stepped quarterly,counts / nights
-capacity_asof_date / _lag_months,date of that snapshot and its staleness,monthly,date / int
-occupied_room_nights_proxy,available_room_nights_asof × room_occupancy/100 — PROXY,monthly*,room-nights
-revenue_proxy,"average_rate × occupied_room_nights_proxy — PROXY, nominal",monthly*,ARS
-real_revenue_proxy_gba,"revenue_proxy / cpi_gba × 100 — PROXY, constant",monthly*,ARS const
+is_longrun,date ≥ 2008-01 (nominal-only context),monthly,0/1
+in_sample,main analysis sample: 2018-19 + 2022 … 2026-05,monthly,0/1
+is_covid / covid_hole,2020-01…2021-12 held out / 2020-03…2021-12 detail missing,monthly,0/1
+split,train (2018-19 + 2022) / valid (2023) / test (2024…2026-05) / none,monthly,str
+in_window / covid_any,back-compat aliases (2018-01…2026-05 / is_covid),monthly,0/1
+"*_asof, capacity_asof_date/_lag_months",nearest prior quarterly capacity snapshot + staleness,stepped Q,counts/nights
+occupied_room_nights_proxy / revenue_proxy / real_revenue_proxy_gba,PROXIES (monthly occ × quarterly capacity),monthly*,room-nights / ARS
 dln_*,"first difference of natural log, within category",monthly,log pts
-in_window,1 if 2016-12 ≤ date ≤ 2026-05 (CPI-valid analysis window),monthly,0/1
 rate_missing_reason,why average_rate is NaN (see missing_value_map.csv),monthly,str

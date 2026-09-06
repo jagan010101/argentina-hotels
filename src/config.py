@@ -91,27 +91,69 @@ CATEGORY_LABELS = {
     "boutique": "Boutique",
     "hostel": "Hostel",
     "otros_resto": "Other / rest",
+    "total_composite": "Total (composite)",
 }
 
-# Modelling scope (DATA_AUDIT.md sec 10)
+# Modelling scope
 CORE_CATEGORIES = ["stars_1_2", "stars_3", "stars_4", "stars_5"]
 SECONDARY_CATEGORIES = ["apart", "boutique"]
-MODEL_CATEGORIES = CORE_CATEGORIES + SECONDARY_CATEGORIES  # have a price series + stable definition
+MODEL_CATEGORIES = CORE_CATEGORIES + SECONDARY_CATEGORIES
+# "Total" has no rate column in the source -> a capacity-weighted composite is
+# built in notebook 03 and appended as this key (quarterly-anchored, derived).
+COMPOSITE_TOTAL = "total_composite"
+PRESENT_CATEGORIES = CORE_CATEGORIES + [COMPOSITE_TOTAL]   # for the headline story
 
 # --------------------------------------------------------------------------- #
-# Analysis window & structural-break dates  (DATA_AUDIT.md sec 6 & 10)
+# Sample windows & structural-break dates  (see PROJECT_AUDIT.md sec 4-5)
 # --------------------------------------------------------------------------- #
-WINDOW_START = "2016-12-01"   # first month with official CPI
-WINDOW_END = "2026-05-01"     # last hotel observation
+# CPI coverage bound (GBA IPC via the dic-2016 bridge starts 2016-04)
+CPI_MIN_DATE = "2016-04-01"
+DATA_END = "2026-05-01"
 
-# COVID: hard data hole (category detail unavailable) and degraded-recovery year
-COVID_HOLE_START = "2020-03-01"
+# Long-run *nominal-only* context (never CPI-deflated below this only for plots)
+LONGRUN_START = "2008-01-01"
+
+# Main analysis sample: pre-COVID normal + post-COVID, COVID handled separately.
+ANALYSIS_SEGMENTS = [("2018-01-01", "2019-12-01"),
+                     ("2022-01-01", "2026-05-01")]
+
+# COVID structural break: hard data hole + kept entirely out of the main sample
+COVID_START = "2020-01-01"
+COVID_END = "2021-12-01"
+COVID_HOLE_START = "2020-03-01"   # category detail genuinely missing
 COVID_HOLE_END = "2021-12-01"
+# retained for backward compat with earlier notebooks
 COVID_RECOVERY_START = "2022-01-01"
 COVID_RECOVERY_END = "2022-12-01"
+WINDOW_START, WINDOW_END = "2018-01-01", "2026-05-01"
 
-# Full nominal-only context window (descriptive plots only, never CPI-deflated)
-NOMINAL_CONTEXT_START = "2008-01-01"
+# Temporal backtest split (PROJECT_AUDIT.md sec 4)
+TRAIN_SEGMENTS = [("2018-01-01", "2019-12-01"), ("2022-01-01", "2022-12-01")]
+VALID_SEGMENT = ("2023-01-01", "2023-12-01")
+TEST_SEGMENT = ("2024-01-01", "2026-05-01")
+
+# --------------------------------------------------------------------------- #
+# Repricing-policy parameters
+# --------------------------------------------------------------------------- #
+# Cumulative-inflation repricing threshold tau (fraction, not %)
+THRESHOLD_GRID = [0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.10]
+
+# Operational penalty for the Objective = Revenue - lambda * N_reprice sweep.
+# lambda is expressed as a FRACTION of mean monthly revenue per repricing event;
+# NOT a calibrated monetary cost -- report the whole range / the Pareto frontier.
+LAMBDA_GRID = [0.0, 0.005, 0.01, 0.02, 0.03, 0.05, 0.08, 0.12]
+
+# Occupancy tilt band for Policy 3 (fraction added/subtracted at a repricing)
+OCC_TILT_GRID = [0.00, 0.02, 0.03, 0.05, 0.08]
+
+# Demand-elasticity scenarios for policy evaluation (occupancy is inelastic and
+# not causally identified -- results are reported as a function of assumed beta)
+BETA_SCENARIOS = [0.0, -0.25, -0.50, -1.00]
+
+# Inflation-regime cut points: data-driven terciles of GBA monthly inflation,
+# computed within the analysis sample (see notebook 05).
+REGIME_QUANTILES = [0.0, 1 / 3, 2 / 3, 1.0]
+REGIME_LABELS = ["low", "mid", "high"]
 
 # CPI deflator base period (native base of the INDEC file)
 CPI_BASE_LABEL = "dic-2016 = 100"
