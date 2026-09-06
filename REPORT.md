@@ -61,7 +61,7 @@ Everything in this report is in service of two questions:
 
 ---
 
-## 2 · How bad is the inflation? (notebook 02)
+## 2 · How bad is the inflation?
 
 Two high-inflation episodes fall inside the analysis window (GBA consumer price
 index):
@@ -107,7 +107,7 @@ policy in opposite ways.
 
 ---
 
-## 3 · The data on one page (notebook 01)
+## 3 · The data on one page
 
 ### 3.1 Sources — all official, `data/raw/`, read-only
 
@@ -174,7 +174,7 @@ to model. Effective clean sample: **≈ 77 months per category**.
 
 ---
 
-## 4 · Finding 1 — inflation makes each price move *bigger*, not more *frequent* (notebook 03)
+## 4 · Finding 1 — inflation makes each price move *bigger*, not more *frequent*
 
 Split every month into three **inflation regimes** (low / mid / high terciles of
 GBA monthly inflation; the high tercile averages 9.6%/month and reaches 25%),
@@ -208,7 +208,7 @@ allow before you close it*.
 
 ---
 
-## 5 · Finding 2 — you cannot watch demand react to price (notebook 04)
+## 5 · Finding 2 — you cannot watch demand react to price
 
 If you raise the real price, does occupancy fall? We tried hard to measure this
 and the honest answer is: **not from this data.**
@@ -247,7 +247,7 @@ tourists), so price and occupancy rise together.
 
 ---
 
-## 6 · Finding 3 — rates roughly keep up with CPI, but lumpily (notebook 03)
+## 6 · Finding 3 — rates roughly keep up with CPI, but lumpily
 
 **Pass-through.** Regress the monthly change in log rate on the monthly change in
 log CPI (contemporaneous, HAC standard errors):
@@ -280,7 +280,7 @@ Upper tiers pass inflation through fully or a touch more; **3★ is the laggard*
 
 ---
 
-## 7 · The rule — optimise the *timing*, not the price (notebook 05)
+## 7 · The rule — optimise the *timing*, not the price
 
 Since there is no "optimal price" to find, define a family of **timing rules** and
 compare them on the axes we *can* measure: number of price changes, how tightly
@@ -338,7 +338,7 @@ Reading it:
 
 ---
 
-## 8 · Does it actually work? The out-of-sample test (notebook 05)
+## 8 · Does it actually work? The out-of-sample test
 
 Freeze τ\* = 6% and δ\* using **only 2018–2023 data**. Fit the seasonal factors
 and the real-rate target on the training years. Then run the frozen rule on the
@@ -373,7 +373,7 @@ Two footnotes to the story:
 
 ---
 
-## 9 · One rule fits every category (notebook 06)
+## 9 · One rule fits every category
 
 Give each category its *own* frontier and its *own* knee:
 
@@ -392,7 +392,7 @@ Give each category its *own* frontier and its *own* knee:
 
 ---
 
-## 10 · Robustness (notebook 07)
+## 10 · Robustness
 
 Re-run the whole pipeline under eight variations — GBA vs national CPI, room vs
 bed occupancy, all four β values, drop the most extreme inflation months,
@@ -417,7 +417,7 @@ occupancy craters** (see §13).
 
 ---
 
-## 11 · The theory — why 6% is not an accident (notebook 06)
+## 11 · The theory — why 6% is not an accident
 
 Everything so far is empirical: τ ≈ 6% is where a fitted trade-off curve bends.
 This section shows the **same number falls out of a 50-year-old model** of
@@ -474,7 +474,7 @@ demotion). This is the standard **reference-price / customer-market** treatment
 (Rotemberg 2005; Nakamura & Steinsson 2011). The (s, S) algebra above is
 **unchanged** — only the interpretation of the target and of `b` shifts.
 
-### 11.3 Calibrating the model (Table 8)
+### 11.3 Calibrating the model
 
 Every reset in the model is exactly `w*` wide, so the **observed mean absolute
 log price change identifies `w*`** directly, and `κ/b = w*³ / (12·π̄)` (in
@@ -502,7 +502,7 @@ separately; pinning `κ` at a literature-plausible ~2% of monthly revenue implie
 a loss curvature `b ≈ 15–115` — a steep penalty for off-market real pricing,
 consistent with a competitive, OTA-mediated market.
 
-### 11.4 Testing the sharp prediction — the scaling law (Table 9)
+### 11.4 Testing the sharp prediction — the scaling law
 
 The calibration only used the *average* move. The model's real content is the
 **exponents**: price-change **size** should have an inflation-elasticity of
@@ -524,7 +524,7 @@ rolling windows* (HAC SE), pooled over the four star tiers:
 > month, so there is no slack on the frequency margin
 > (`11_chart11_scaling_law.png`).
 
-### 11.5 Closing the loop (Table 10)
+### 11.5 Closing the loop
 
 Feed each category's **model-calibrated** τ\* (deseasonalised) back through the
 out-of-sample simulator:
@@ -553,7 +553,7 @@ both dominate what hotels actually did.
 
 ---
 
-## 12 · The recommended rule (Chart 9)
+## 12 · The recommended rule
 
 > **Each month, add up CPI inflation since your last price change (`CUMINF`).**
 >
