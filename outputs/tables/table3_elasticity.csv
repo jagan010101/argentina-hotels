@@ -1,0 +1,31 @@
+hotel_category,label,spec,beta,se,t,n,r2
+stars_1_2,1-2 star,loglog,0.997,0.174,5.72,77,0.758
+stars_1_2,1-2 star,loglog_lag,0.946,0.327,2.89,76,0.753
+stars_1_2,1-2 star,loglog_lag_sum,1.036,0.09,11.45,76,0.753
+stars_1_2,1-2 star,levels,0.079,0.011,7.03,77,0.797
+stars_1_2,1-2 star,logit,1.874,0.286,6.54,77,0.798
+stars_3,3 star,loglog,0.323,0.136,2.37,77,0.782
+stars_3,3 star,loglog_lag,0.294,0.153,1.92,76,0.784
+stars_3,3 star,loglog_lag_sum,0.331,0.138,2.4,76,0.784
+stars_3,3 star,levels,0.026,0.009,2.84,77,0.798
+stars_3,3 star,logit,0.879,0.36,2.44,77,0.795
+stars_4,4 star,loglog,0.01,0.094,0.11,77,0.76
+stars_4,4 star,loglog_lag,0.066,0.17,0.39,76,0.764
+stars_4,4 star,loglog_lag_sum,-0.003,0.093,-0.04,76,0.764
+stars_4,4 star,levels,0.001,0.006,0.14,77,0.779
+stars_4,4 star,logit,-0.031,0.293,-0.11,77,0.793
+stars_5,5 star,loglog,-0.033,0.067,-0.49,77,0.715
+stars_5,5 star,loglog_lag,-0.027,0.054,-0.51,76,0.74
+stars_5,5 star,loglog_lag_sum,-0.064,0.067,-0.95,76,0.74
+stars_5,5 star,levels,-0.001,0.001,-0.6,77,0.732
+stars_5,5 star,logit,-0.089,0.203,-0.44,77,0.744
+apart,Apart-hotel,loglog,0.056,0.107,0.52,77,0.615
+apart,Apart-hotel,loglog_lag,-0.012,0.067,-0.19,76,0.633
+apart,Apart-hotel,loglog_lag_sum,0.103,0.137,0.75,76,0.633
+apart,Apart-hotel,levels,0.004,0.005,0.7,77,0.633
+apart,Apart-hotel,logit,0.077,0.286,0.27,77,0.635
+boutique,Boutique,loglog,0.112,0.078,1.44,77,0.678
+boutique,Boutique,loglog_lag,0.3,0.123,2.43,76,0.706
+boutique,Boutique,loglog_lag_sum,0.085,0.075,1.14,76,0.706
+boutique,Boutique,levels,0.004,0.003,1.37,77,0.691
+boutique,Boutique,logit,0.296,0.226,1.31,77,0.702

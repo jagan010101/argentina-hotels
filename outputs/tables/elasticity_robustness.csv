@@ -1,0 +1,73 @@
+hotel_category,label,occ,deflator,sample,beta,t,n
+stars_1_2,1-2 star,room_occupancy,real_rate_gba,covid_excl,0.997,5.72,77
+stars_1_2,1-2 star,room_occupancy,real_rate_gba,incl_2022,0.997,5.72,77
+stars_1_2,1-2 star,room_occupancy,real_rate_gba,ex_extreme,0.867,4.99,69
+stars_1_2,1-2 star,room_occupancy,real_rate_nac,covid_excl,0.996,5.76,77
+stars_1_2,1-2 star,room_occupancy,real_rate_nac,incl_2022,0.996,5.76,77
+stars_1_2,1-2 star,room_occupancy,real_rate_nac,ex_extreme,0.868,5.11,69
+stars_1_2,1-2 star,bed_occupancy,real_rate_gba,covid_excl,0.672,6.19,77
+stars_1_2,1-2 star,bed_occupancy,real_rate_gba,incl_2022,0.672,6.19,77
+stars_1_2,1-2 star,bed_occupancy,real_rate_gba,ex_extreme,0.521,5.2,69
+stars_1_2,1-2 star,bed_occupancy,real_rate_nac,covid_excl,0.662,6.01,77
+stars_1_2,1-2 star,bed_occupancy,real_rate_nac,incl_2022,0.662,6.01,77
+stars_1_2,1-2 star,bed_occupancy,real_rate_nac,ex_extreme,0.518,5.14,69
+stars_3,3 star,room_occupancy,real_rate_gba,covid_excl,0.323,2.37,77
+stars_3,3 star,room_occupancy,real_rate_gba,incl_2022,0.089,0.56,89
+stars_3,3 star,room_occupancy,real_rate_gba,ex_extreme,0.185,1.21,68
+stars_3,3 star,room_occupancy,real_rate_nac,covid_excl,0.331,2.34,77
+stars_3,3 star,room_occupancy,real_rate_nac,incl_2022,0.07,0.43,89
+stars_3,3 star,room_occupancy,real_rate_nac,ex_extreme,0.188,1.2,68
+stars_3,3 star,bed_occupancy,real_rate_gba,covid_excl,0.427,2.71,77
+stars_3,3 star,bed_occupancy,real_rate_gba,incl_2022,0.112,0.59,89
+stars_3,3 star,bed_occupancy,real_rate_gba,ex_extreme,0.279,1.48,68
+stars_3,3 star,bed_occupancy,real_rate_nac,covid_excl,0.438,2.68,77
+stars_3,3 star,bed_occupancy,real_rate_nac,incl_2022,0.087,0.44,89
+stars_3,3 star,bed_occupancy,real_rate_nac,ex_extreme,0.285,1.46,68
+stars_4,4 star,room_occupancy,real_rate_gba,covid_excl,0.01,0.11,77
+stars_4,4 star,room_occupancy,real_rate_gba,incl_2022,0.136,1.1,89
+stars_4,4 star,room_occupancy,real_rate_gba,ex_extreme,-0.055,-0.72,68
+stars_4,4 star,room_occupancy,real_rate_nac,covid_excl,0.006,0.07,77
+stars_4,4 star,room_occupancy,real_rate_nac,incl_2022,0.133,1.07,89
+stars_4,4 star,room_occupancy,real_rate_nac,ex_extreme,-0.056,-0.72,68
+stars_4,4 star,bed_occupancy,real_rate_gba,covid_excl,0.055,0.55,77
+stars_4,4 star,bed_occupancy,real_rate_gba,incl_2022,0.118,1.11,89
+stars_4,4 star,bed_occupancy,real_rate_gba,ex_extreme,-0.053,-0.65,68
+stars_4,4 star,bed_occupancy,real_rate_nac,covid_excl,0.049,0.49,77
+stars_4,4 star,bed_occupancy,real_rate_nac,incl_2022,0.107,1.0,89
+stars_4,4 star,bed_occupancy,real_rate_nac,ex_extreme,-0.055,-0.66,68
+stars_5,5 star,room_occupancy,real_rate_gba,covid_excl,-0.033,-0.49,77
+stars_5,5 star,room_occupancy,real_rate_gba,incl_2022,0.081,0.85,89
+stars_5,5 star,room_occupancy,real_rate_gba,ex_extreme,-0.037,-0.55,68
+stars_5,5 star,room_occupancy,real_rate_nac,covid_excl,-0.031,-0.46,77
+stars_5,5 star,room_occupancy,real_rate_nac,incl_2022,0.095,0.95,89
+stars_5,5 star,room_occupancy,real_rate_nac,ex_extreme,-0.034,-0.51,68
+stars_5,5 star,bed_occupancy,real_rate_gba,covid_excl,-0.014,-0.22,77
+stars_5,5 star,bed_occupancy,real_rate_gba,incl_2022,0.058,0.66,89
+stars_5,5 star,bed_occupancy,real_rate_gba,ex_extreme,-0.025,-0.37,68
+stars_5,5 star,bed_occupancy,real_rate_nac,covid_excl,-0.016,-0.25,77
+stars_5,5 star,bed_occupancy,real_rate_nac,incl_2022,0.066,0.71,89
+stars_5,5 star,bed_occupancy,real_rate_nac,ex_extreme,-0.025,-0.35,68
+apart,Apart-hotel,room_occupancy,real_rate_gba,covid_excl,0.056,0.52,77
+apart,Apart-hotel,room_occupancy,real_rate_gba,incl_2022,0.201,1.53,89
+apart,Apart-hotel,room_occupancy,real_rate_gba,ex_extreme,0.015,0.14,68
+apart,Apart-hotel,room_occupancy,real_rate_nac,covid_excl,0.056,0.52,77
+apart,Apart-hotel,room_occupancy,real_rate_nac,incl_2022,0.213,1.6,89
+apart,Apart-hotel,room_occupancy,real_rate_nac,ex_extreme,0.015,0.14,68
+apart,Apart-hotel,bed_occupancy,real_rate_gba,covid_excl,0.077,0.6,77
+apart,Apart-hotel,bed_occupancy,real_rate_gba,incl_2022,0.196,1.47,89
+apart,Apart-hotel,bed_occupancy,real_rate_gba,ex_extreme,-0.016,-0.13,68
+apart,Apart-hotel,bed_occupancy,real_rate_nac,covid_excl,0.078,0.59,77
+apart,Apart-hotel,bed_occupancy,real_rate_nac,incl_2022,0.202,1.51,89
+apart,Apart-hotel,bed_occupancy,real_rate_nac,ex_extreme,-0.017,-0.14,68
+boutique,Boutique,room_occupancy,real_rate_gba,covid_excl,0.112,1.44,77
+boutique,Boutique,room_occupancy,real_rate_gba,incl_2022,0.125,1.56,89
+boutique,Boutique,room_occupancy,real_rate_gba,ex_extreme,0.049,0.68,68
+boutique,Boutique,room_occupancy,real_rate_nac,covid_excl,0.112,1.44,77
+boutique,Boutique,room_occupancy,real_rate_nac,incl_2022,0.128,1.57,89
+boutique,Boutique,room_occupancy,real_rate_nac,ex_extreme,0.049,0.68,68
+boutique,Boutique,bed_occupancy,real_rate_gba,covid_excl,0.046,0.51,77
+boutique,Boutique,bed_occupancy,real_rate_gba,incl_2022,0.064,0.67,89
+boutique,Boutique,bed_occupancy,real_rate_gba,ex_extreme,-0.036,-0.42,68
+boutique,Boutique,bed_occupancy,real_rate_nac,covid_excl,0.043,0.47,77
+boutique,Boutique,bed_occupancy,real_rate_nac,incl_2022,0.064,0.66,89
+boutique,Boutique,bed_occupancy,real_rate_nac,ex_extreme,-0.038,-0.44,68
