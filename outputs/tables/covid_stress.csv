@@ -1,0 +1,4 @@
+policy,n_reprice,real_dev_mean_pct,real_dev_min_pct,real_revpar_total,months_occ_obs
+P0 frozen,1,-26.7,-50.8,5014.0,17
+P1 monthly CPI,24,-2.9,-4.9,6814.0,17
+P2 τ=6%,10,-4.9,-8.9,6690.0,17

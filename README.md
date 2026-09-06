@@ -48,7 +48,7 @@ aggregate, not individual hotels.
 * **Occupancy elasticity is not causally identified** → policy sims run across
   an assumed-β grid {0, −0.25, −0.5, −1.0}.
 * **"Total"** has no rate column in the source → a capacity-weighted
-  `total_composite` is built in notebook 03 (quarterly weights; derived).
+  `total_composite` is built in notebook 01 (quarterly weights; derived).
 
 ## Repository
 
@@ -64,28 +64,27 @@ src/common.py                 parsing helpers + idempotent audit log
 src/policies.py               repricing-policy engine  (P0/P1/P2/P3; strict t-1 info set)
 src/pricing_eval.py           policy scoring, λ-objective, Pareto frontier
 
-01_load_data.ipynb                   structural extraction of the government sheets
-02_clean_data.ipynb                  coercion, missing-value classification, CPI deflators
-03_merge_data.ipynb                  panel + inflation transforms + composite Total + splits
-04_descriptive_inflation_story.ipynb Part 1  — Charts 1-2, erosion clock, Table 1
-05_repricing_behaviour.ipynb         Parts 2 & 7 — Tables 2-3, regime tests, Charts 3-4
-06_demand_and_identification.ipynb   Part 3  — elasticity (Table 4), IV scrutiny, Chart 5
-07_pricing_policies.ipynb            Part 4  — P0-P3, revenue-optimum degeneracy
-08_threshold_backtest.ipynb          Parts 5 & 6 — frontier + knee, λ sweep, Table 6, Charts 7-8
-09_heterogeneity_and_policy.ipynb    Parts 8 & 10 — Table 7, Chart 6, decision tree (Chart 9)
-10_robustness.ipynb                  Part 9  — robustness matrix
-11_menu_cost_model.ipynb             theory  — Sheshinski–Weiss (s,S) calibration
-                                             + scaling-law test (Tables 8-10, Charts 10-11)
+01_build_dataset.ipynb               load · clean · merge  →  data/processed/*.parquet
+02_inflation_and_repricing.ipynb     Parts 1, 2, 7 — Charts 1-4, erosion clock, Tables 1-3, regime tests
+03_demand_and_identification.ipynb   Part 3 — elasticity (Table 4), IV scrutiny, Chart 5
+04_policies_and_backtest.ipynb       Parts 4, 5, 6 — P0-P3, frontier + knee, λ sweep,
+                                     out-of-sample Table 6, Charts 7-8, COVID stress test
+05_synthesis_menucost_and_rule.ipynb Parts 8, 10 + theory — Table 7 & Chart 6 (heterogeneity),
+                                     Sheshinski–Weiss (s,S) calibration + scaling law
+                                     (Tables 8-10, Charts 10-11), decision tree (Chart 9)
+06_robustness.ipynb                  Part 9 — robustness matrix + COVID-inclusion note
 
 outputs/figures/   Charts 1-11 + diagnostics (20 PNG @ 200 dpi)
-outputs/tables/    Tables 1-10 + supporting CSVs (22 files)
+outputs/tables/    Tables 1-10 + supporting CSVs (23 files)
 ```
 
-The numbered notebooks sit in the repository root and **must be run from the
-repository root** (each does `sys.path.insert(0, "src")` and reads
-`data/processed/`). Core logic (the policy engine and its scoring) lives in
+The six notebooks sit in the repository root and **must be run from the
+repository root, in order** (each does `sys.path.insert(0, "src")` and reads the
+previous one's `data/processed/` output). They are consolidations of an earlier
+11-notebook pipeline; each keeps its section-level names in
+`cleaning_audit_log.csv`. Core logic (the policy engine and its scoring) lives in
 `src/policies.py` and `src/pricing_eval.py`, not in the notebooks.
-`linearmodels` and `patsy` are required (notebooks 06 and 05/10).
+`linearmodels` and `patsy` are required (notebook 03; 02/06).
 
 ## Reproduce
 
@@ -96,7 +95,7 @@ python -m ipykernel install --user --name argentina-hotels --display-name "Pytho
 
 # from the repository root:
 jupyter nbconvert --to notebook --execute --inplace \
-    --ExecutePreprocessor.kernel_name=argentina-hotels [0-9]*.ipynb      # 01 -> 11, ~2 min
+    --ExecutePreprocessor.kernel_name=argentina-hotels [0-9]*.ipynb      # 01 -> 06, ~3 min
 ```
 
 Each notebook reads the previous notebook's parquet from `data/processed/`.
@@ -116,7 +115,7 @@ observed pricing), and leaves revenue essentially unchanged — out-of-sample an
 across robustness checks.
 
 The trigger is the canonical **Sheshinski–Weiss (s, S) menu-cost rule**
-(notebook 11): its calibrated τ\* (≈ 6.3%) matches the fitted knee, and its
+(notebook 05): its calibrated τ\* (≈ 6.3%) matches the fitted knee, and its
 scaling law — price-change *size* ∝ π^{1/3} — holds in the data (estimated
 elasticity 0.33), while *frequency* does not respond.
 
@@ -125,4 +124,9 @@ elasticity 0.33), while *frequency* does not respond.
 Aggregate category data; no official CPI pre-2016 (~77 clean months/category);
 occupancy elasticity associational only; no cost data (revenue trade-off, not
 profit); repricing *frequency* only weakly observable from category-mean rates;
-COVID 2020-21 held out; composite "Total" is a construction.
+composite "Total" is a construction. **COVID 2020-21**: category rate series are
+`///` for 22 of 24 months, so no price-based re-estimation is possible — the
+recommended rule is *simulated* through the collapse (notebook 04 stress test:
+it holds the real price within ~5% of target and does not break) but it is
+**validated for inflation regimes, not demand-collapse regimes**, and has no
+price-cut branch.

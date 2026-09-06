@@ -3,7 +3,7 @@
 
 **Project report.** Analysis level: *Buenos Aires City × hotel category × month*
 (aggregate official statistics — not individual-hotel dynamic pricing). All
-figures are reproduced by the numbered notebooks `01`–`10` in the repository
+figures are reproduced by the six numbered notebooks `01`–`06` in the repository
 root; every table and chart cited is in `outputs/`.
 
 ---
@@ -100,8 +100,8 @@ only weakly observable (it moves most months); the analysis leans on the
 
 ### 3.2 The analysis panel
 
-Notebooks `01`–`03` turn the presentation-formatted spreadsheets into one clean
-monthly panel (`data/processed/03_analysis_panel.parquet`, 2,407 rows,
+Notebook `01_build_dataset` turns the presentation-formatted spreadsheets into
+one clean monthly panel (`data/processed/03_analysis_panel.parquet`, 2,407 rows,
 11 categories):
 
 * **CPI deflators.** `cpi_gba` = IPC Región GBA *Nivel general*, spliced from the
@@ -169,7 +169,7 @@ regimes stress the policies very differently (see §6.6, §6.8).
 
 ## 5 · Method
 
-### 5.1 Descriptive erosion (notebook 04, Part 1)
+### 5.1 Descriptive erosion (notebook 02, Part 1)
 
 Real hotel rates (index, first obs = 100) swung between roughly **80 and 200**
 against a flat "kept pace with CPI" line (Charts 1–2). Mechanical erosion clock:
@@ -177,7 +177,7 @@ under a frozen nominal rate the real value after *k* months is `1 / Π(1+π)`. A
 the sample's high-inflation pace (~9%/mo) it reaches **−5% in 1 month, −10% in
 2 months**; at the low pace (~2%/mo), ~3 and ~5 months (`04_erosion_clock`).
 
-### 5.2 Repricing behaviour and pass-through (notebook 05, Parts 2 & 7)
+### 5.2 Repricing behaviour and pass-through (notebook 02, Parts 2 & 7)
 
 Per category: frequency of non-trivial changes, mean/median |Δln P|, mean
 positive and negative change, the p10/p90 of the change distribution, and the
@@ -200,7 +200,7 @@ tiers, **category fixed effects, HAC SE**:
 * frequency: `1[|Δln P|>1%]_t = … + FE` (linear probability)
 * pass-through: `Δln P_t = β0·Δln CPI + β1·(Δln CPI·1[mid]) + β2·(Δln CPI·1[high]) + FE`
 
-### 5.3 Demand response and identification (notebook 06, Part 3)
+### 5.3 Demand response and identification (notebook 03, Part 3)
 
 **Naive elasticity** — `ln(occ)_t = α + β·ln(RealRate)_t + γ·infl_t + Σ month
 dummies + trend + ε`, per category, HAC SE. Four specifications compared:
@@ -225,7 +225,7 @@ capacity; the fact that high-inflation months coincide with high season).
 > restriction. Headline CPI is retained as deflator/regressor: the hotel
 > sub-component of headline CPI is ~1%, immaterial.
 
-### 5.4 The policy engine (notebook 07 + `src/policies.py`, Part 4)
+### 5.4 The policy engine (notebook 04 + `src/policies.py`, Part 4)
 
 Pure functions, unit-testable, with a **strict t−1 information set** (INDEC
 publishes month-*t* CPI in mid-month *t+1*, so a month-*t* price may use CPI
@@ -249,7 +249,7 @@ not the starting price.
 frequency/stability trade-off, and why occupancy enters only through the assumed
 β grid `{0, −0.25, −0.5, −1.0}`.
 
-### 5.5 Threshold optimisation and the frontier (notebook 08, Part 5)
+### 5.5 Threshold optimisation and the frontier (notebook 04, Part 5)
 
 Simulate P2 over the **selection window 2022–2023** (excludes test) for
 τ ∈ {1,2,3,4,5,6,7,8,10}%, pooled across the five present categories. Record
@@ -263,7 +263,7 @@ taking the τ closest to the ideal corner. Also: an explicit
 `Objective = Revenue − λ · N_reprice · mean_revenue` swept over
 λ ∈ {0 … 0.12} (λ is an operational dial, *not* a calibrated cost).
 
-### 5.6 Backtest (notebook 08, Part 6)
+### 5.6 Backtest (notebook 04, Part 6)
 
 Seasonal occupancy factors and the real-rate target are fit on **train** only.
 τ\* (the knee) and δ\* are chosen on **validation 2023**. The frozen choice is
@@ -431,21 +431,22 @@ Per-category knee τ\* (each category's own 2022–23 frontier):
 > change size (5★ makes the largest moves), not in *when* to trigger. A single
 > τ ≈ 6% serves all; upper tiers can sit at the top of the 4–7% band.
 
-### 6.8 Robustness (notebook 10, `robustness_matrix.csv`, `robustness_regime.csv`)
+### 6.8 Robustness (notebook 06, `robustness_matrix.csv`, `robustness_regime.csv`, `covid_stress.csv`)
 
 | claim | verdict across variants |
 |---|---|
 | **A** — knee τ\* in the 4–7% band | 7/8 (τ = 7% under the national CPI deflator) |
 | **B** — threshold rule beats observed pricing on real-price stability **and** change count, OOS | **8/8** |
 | **C** — monthly indexing lags in an acceleration | ~17% real-price deviation in 2022–23 (7/8); ~4.5% in the 2024–26 disinflation |
-| **D** — occupancy inelastic / not identified | holds (notebook 06) |
+| **D** — occupancy inelastic / not identified | holds (notebook 03) |
 | **E** — larger & more-upward changes, not mainly more frequent | magnitude & asymmetry significant 3/3; frequency effect ~9 pp, an order of magnitude smaller |
+| **F** — the rule does not break through a demand collapse | COVID stress (notebook 04): total-hotel occupancy fell **62% → 27%** over 2020-21; simulated through it, the frozen price loses **−27%** real, monthly indexing keeps ~−3%, the **τ = 6% rule fires 10× (vs 24) and holds −5%** — it holds the real price, but it is inflation-state-dependent only and has **no price-cut branch** for a demand collapse (§8). |
 
 Variants tested: GBA ↔ national CPI; room ↔ bed occupancy; β ∈ {0, −0.25, −0.5,
 −1}; exclude-extreme-inflation months (> p90); selection = 2023 only; core star
 tiers vs including the composite.
 
-### 6.9 A menu-cost (s, S) foundation for the threshold (notebook 11)
+### 6.9 A menu-cost (s, S) foundation for the threshold (notebook 05)
 
 The τ\* trigger is not ad-hoc — it is the canonical **Sheshinski & Weiss (1977) /
 Barro (1972)** menu-cost rule. A firm whose real price drifts down at the
@@ -538,8 +539,15 @@ most.
 5. **Repricing *frequency* is only weakly observable** — `average_rate` is a
    category mean, so it moves most months regardless. The magnitude, asymmetry,
    pass-through and threshold results do not depend on the frequency measure.
-6. **COVID 2020-21** is a genuine data hole (star-tier rates missing 2020-03 …
-   2021-12); held out entirely.
+6. **COVID 2020-21.** The category room-rate series is `///` for 22 of 24 months,
+   so no price-based estimate can include it — a "COVID dummy" cannot help
+   because `Δln P` is itself missing. The recommended rule is *simulated* through
+   the collapse (§6.8-F, notebook 04): it holds the real price within ~5% of
+   target and does not break, but it is **validated for inflation regimes, not
+   demand-collapse regimes**, and it is inflation-state-dependent only — it has
+   **no branch that cuts the price when occupancy craters** (a hotel might want a
+   discretionary promotional cut for cash-flow reasons the model does not
+   capture; given inelastic demand a mechanical cut would not recover occupancy).
 7. **The composite "Total"** is a capacity-weighted construction with quarterly
    weights, not an INDEC/EHOBA series.
 8. **`λ` in the objective** is an operational dial, not a calibrated monetary
@@ -560,32 +568,27 @@ pip install -r requirements.txt
 python -m ipykernel install --user --name argentina-hotels --display-name "Python (argentina-hotels)"
 # run from the repository root:
 jupyter nbconvert --to notebook --execute --inplace \
-    --ExecutePreprocessor.kernel_name=argentina-hotels [0-9]*.ipynb        # 01 -> 11, ~2 min
+    --ExecutePreprocessor.kernel_name=argentina-hotels [0-9]*.ipynb        # 01 -> 06, ~3 min
 ```
 
 * `data/raw/**` is never modified. `data/processed/**` is git-ignored and fully
-  regenerated by notebooks 01–03.
+  regenerated by notebook 01.
 * Every cleaning / modelling decision is appended to
   `data/processed/cleaning_audit_log.csv` (idempotent per notebook).
 * Core logic is in `src/` (`config`, `common`, `policies`, `pricing_eval`), not
   buried in notebooks. `src/policies.py` and `src/pricing_eval.py` are pure and
   independently testable.
 
-### Notebook map
+### Notebook map (six consolidated notebooks; run in order from the repo root)
 
 | notebook | brief part(s) | key outputs |
 |---|---|---|
-| `01_load_data` | — | `data/processed/01_loaded/*.parquet` |
-| `02_clean_data` | — | `02_panel_long`, `02_cpi_monthly`, `02_capacity_quarterly` |
-| `03_merge_data` | — | `03_analysis_panel.parquet`, `data_dictionary.csv`, INDEC cross-check |
-| `04_descriptive_inflation_story` | 1 | Charts 1–2, erosion clock, sample map, Table 1 |
-| `05_repricing_behaviour` | 2, 7 | Tables 2–3, `regime_tests.csv`, Charts 3–4 |
-| `06_demand_and_identification` | 3 | Table 4, `identification_summary.csv`, Chart 5, `06_identification.png` |
-| `07_pricing_policies` | 4 | `07_revenue_curves`, `07_policy_paths_4star`, `table_policy_example.csv` |
-| `08_threshold_backtest` | 5, 6 | Tables 5–6, `pareto_frontier.csv`, `lambda_sweep.csv`, Charts 7–8, `08_frontier_robustness` |
-| `09_heterogeneity_and_policy` | 8, 10 | Table 7, Chart 6, decision-tree Chart 9 |
-| `10_robustness` | 9 | `robustness_matrix.csv`, `robustness_regime.csv` |
-| `11_menu_cost_model` | (theory) | Tables 8–10, Charts 10–11 — Sheshinski–Weiss (s, S) calibration + scaling-law test |
+| `01_build_dataset` | data | `data/processed/*.parquet`, `data_dictionary.csv`, INDEC cross-check, `01_loaded/` |
+| `02_inflation_and_repricing` | 1, 2, 7 | Charts 1–4, erosion clock, sample map; Tables 1–3; `regime_tests.csv`, `price_adjustment_by_category.csv` |
+| `03_demand_and_identification` | 3 | Table 4, `identification_summary.csv`, Chart 5, `06_identification.png` |
+| `04_policies_and_backtest` | 4, 5, 6 | Tables 5–6, `pareto_frontier.csv`, `lambda_sweep.csv`, `covid_stress.csv`, Charts 7–8, `07_revenue_curves` |
+| `05_synthesis_menucost_and_rule` | 8, 10 + theory | Table 7 & Chart 6 (heterogeneity); Tables 8–10, Charts 10–11 (Sheshinski–Weiss (s, S) calibration + scaling-law test); decision-tree Chart 9 |
+| `06_robustness` | 9 | `robustness_matrix.csv`, `robustness_regime.csv`, COVID-inclusion note |
 
 ### Tables (`outputs/tables/`)
 

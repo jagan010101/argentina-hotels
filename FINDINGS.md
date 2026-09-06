@@ -13,7 +13,7 @@ robustness), base dic-2016 = 100. Main sample **2018-01…2019-12 + 2022-01…20
 **Total (composite)**. No marginal-cost data → we compare *policies* and map the
 *trade-off*; we do **not** claim a profit- or revenue-maximising price.
 
-Every number below is reproduced by `notebooks/04–10`.
+Every number below is reproduced by notebooks `02`–`06`.
 
 ---
 
@@ -51,7 +51,7 @@ inflation through fully or slightly over; **3★ is the laggard**.
 
 The naive elasticity is **positive or ~zero** (1-2★ +0.85, 3★ +0.10, 4★ +0.30,
 5★ +0.14; Table 4) — the wrong sign for a demand curve, because hotels raise real
-prices *into* strong demand. Identification attempts (notebook 06):
+prices *into* strong demand. Identification attempts (notebook 03):
 
 * **relative-price panel** (tier vs cross-tier mean, month + category FE): β = **+0.07** — no downward relative demand response.
 * **2SLS** with a housing/utilities operating-cost instrument: first stages weak (F ≈ 2–17) and the over-ID test is rejected for the categories where it isn't weak. The previously-used "Restaurants & hotels" CPI instrument was **dropped** — it mechanically contains hotel prices.
@@ -87,7 +87,7 @@ What hotels actually did, over the same window: **21 price changes, real-price
 deviation 16%, CV 15%**. Every threshold τ tracked the real price **~2× tighter**
 at a similar or lower change count.
 
-### A menu-cost (s, S) foundation (notebook 11)
+### A menu-cost (s, S) foundation (notebook 05)
 
 The trigger is the canonical **Sheshinski–Weiss (1977)** menu-cost rule: an
 (s, S) band of width `w* = (12·κ·π/b)^{1/3}`, repriced when cumulative inflation
@@ -130,18 +130,20 @@ is common. Categories differ in *how they pass through*: 3★ passes through lea
 makes the largest changes (mean \|Δln\| 10.6% vs 6.7% for 1-2★). A single τ ≈ 6%
 serves all; upper tiers can carry the top of the 4–7% band.
 
-## 8 · Robustness (notebook 10)
+## 8 · Robustness (notebook 06)
 
 | claim | verdict |
 |---|---|
 | **A** knee τ* in 4–7% | holds 7/8 variants (τ = 7% under national CPI) |
 | **B** threshold beats observed on real-price stability *and* fewer changes | **8/8 variants** |
 | **C** monthly indexing lags in an acceleration | madev ≈ 17% in 2022-23 (7/8); fine in the 2024-26 disinflation |
-| **D** occupancy inelastic / not identified | holds (nb 06) |
+| **D** occupancy inelastic / not identified | holds (nb 03) |
 | **E** larger & more-upward changes, not mainly more frequent | magnitude & asymmetry significant 3/3; frequency effect ~9 pp, an order of magnitude smaller |
+| **F** the rule does not break in a demand collapse | COVID stress (nb 04): total-hotel occupancy **62% → 27%** over 2020-21; simulated through it the frozen price loses **−27%** real, the τ = 6% rule fires **10× (vs 24)** and holds **−5%** — it holds the real price but has **no price-cut branch** for a demand collapse |
 
 Tested across: GBA↔national CPI, room↔bed occupancy, β ∈ {0, −0.25, −0.5, −1},
-exclude extreme-inflation months, selection = 2023-only, core tiers vs +composite.
+exclude-extreme-inflation months, selection = 2023-only, core tiers vs +composite;
+plus the COVID demand-collapse stress simulation.
 
 ---
 
@@ -178,6 +180,9 @@ checks.
   constant-elasticity revenue optimum is degenerate and not used.
 * `average_rate` is a category mean, so repricing *frequency* is only weakly
   observable; the magnitude / asymmetry / threshold results do not depend on it.
-* COVID 2020-21 is a genuine data hole (star-tier rates missing); held out.
+* COVID 2020-21: the category rate series is `///` for 22/24 months, so no
+  price-based estimate can include it. The rule is *simulated* through the
+  collapse (§8-F) — it holds the real price but is **validated for inflation
+  regimes only**, and has **no branch that cuts the price when demand craters**.
 * The composite "Total" rate is a capacity-weighted construction (quarterly
   weights), not an official series.
