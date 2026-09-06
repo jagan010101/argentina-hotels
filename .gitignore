@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# Processed data is reproducible from data/raw + notebooks
+data/processed/
+
+# OS
+.DS_Store
+
+# Keep: data/raw/**, outputs/**, notebooks/**, src/**
+!data/raw/
