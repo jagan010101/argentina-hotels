@@ -1,0 +1,9 @@
+hotel_category,label,calib,w_star_pct,pi_bar_pct,kappa_over_b_months,b_if_kappa_is_2pct_rev,tau_star_model_pct,T_star_model_months
+stars_1_2,1-2 star,raw,6.77,5.18,0.0005,40.0,6.77,1.31
+stars_1_2,1-2 star,deseasonalised,4.78,5.18,0.00018,113.7,4.78,0.92
+stars_3,3 star,raw,7.88,5.3,0.00077,26.0,7.88,1.49
+stars_3,3 star,deseasonalised,5.77,5.3,0.0003,66.2,5.77,1.09
+stars_4,4 star,raw,7.55,5.3,0.00068,29.6,7.55,1.42
+stars_4,4 star,deseasonalised,5.24,5.3,0.00023,88.7,5.24,0.99
+stars_5,5 star,raw,10.66,5.3,0.00191,10.5,10.66,2.01
+stars_5,5 star,deseasonalised,9.25,5.3,0.00124,16.1,9.25,1.74

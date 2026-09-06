@@ -36,6 +36,12 @@ Main results:
    (versus ~11% for what hotels actually did), and leaves revenue unchanged —
    **out-of-sample** and across nine robustness variants.
 5. Adding an occupancy tilt (Policy 3) **did not help** out-of-sample.
+6. **The threshold has a theoretical basis.** The cumulative-inflation trigger is
+   the canonical Sheshinski–Weiss (s, S) menu-cost rule; its calibrated
+   prediction for τ\* (mean **6.3%**) coincides with the fitted knee, and its
+   sharp scaling law — price-change *size* ∝ π^{1/3} — holds in the data almost
+   exactly (estimated elasticity **0.33**), while the companion prediction for
+   *frequency* (∝ π^{2/3}) is rejected. Inflation is absorbed on the size margin.
 
 The recommended rule is in §7 and drawn as a decision tree in Chart 9.
 
@@ -436,8 +442,54 @@ Per-category knee τ\* (each category's own 2022–23 frontier):
 | **E** — larger & more-upward changes, not mainly more frequent | magnitude & asymmetry significant 3/3; frequency effect ~9 pp, an order of magnitude smaller |
 
 Variants tested: GBA ↔ national CPI; room ↔ bed occupancy; β ∈ {0, −0.25, −0.5,
-−1}; exclude extreme-inflation months (> p90); selection = 2023 only; core star
+−1}; exclude-extreme-inflation months (> p90); selection = 2023 only; core star
 tiers vs including the composite.
+
+### 6.9 A menu-cost (s, S) foundation for the threshold (notebook 11)
+
+The τ\* trigger is not ad-hoc — it is the canonical **Sheshinski & Weiss (1977) /
+Barro (1972)** menu-cost rule. A firm whose real price drifts down at the
+inflation rate π, faces a quadratic loss `L(p) = (b/2)p²` for being off its
+target real price, and pays a fixed cost `κ` per change, optimally follows an
+**(s, S) band** of width
+
+    w* = (12 · κ · π / b)^{1/3}          reset every  T* = w*/π  months,
+
+so the cumulative inflation between resets is exactly **τ\* = w\* ∝ π^{1/3}** —
+i.e. Policy P2 *is* the (s, S) rule and τ = w\*. (Modification: the target real
+price is taken as an exogenous competitive benchmark, not a monopoly optimum,
+because there is no cost data and demand is inelastic — §6.4, §5.4.)
+
+**Calibration (Table 8).** The observed mean absolute (deseasonalised) log price
+change identifies `w*`; it gives τ\* ≈ **4.8% (1-2★), 5.8% (3★), 5.2% (4★),
+9.3% (5★)** — mean **6.3%**, coinciding with the empirical frontier knee of 6%
+and the λ-objective band of 4–7%. Only `κ/b` is identified (≈ 0.0002–0.0012
+months); for a literature-plausible menu cost of ~2% of monthly revenue the
+implied loss curvature is `b` ≈ 20–100 — a steep penalty for off-market real
+pricing, consistent with a competitive, OTA-mediated market.
+
+**The scaling law (Table 9, Chart 11).** The model's sharp prediction is that the
+**size** of price changes has an inflation-elasticity of **1/3** and the
+**frequency** an elasticity of **2/3**. Estimated (pooled star tiers, across
+inflation deciles / the three regimes / 12-month rolling windows):
+
+| margin | estimated elasticity | model |
+|---|---|---|
+| size, `ln mean|Δln P|` on `ln π` | **0.33 / 0.34 / 0.27** (decile CI [0.17, 0.49]) | **1/3** |
+| frequency, `ln P(|Δln P|>1pp)` on `ln π` | 0.06 / 0.08 / 0.06 | 2/3 |
+
+> **The size margin obeys the menu-cost law almost exactly; the frequency margin
+> does not respond at all.** In this market inflation is absorbed entirely
+> through *larger* price changes, not *more frequent* ones — the structural
+> counterpart of the descriptive finding in §6.2. The frequency elasticity is ~0
+> because the reported average rate is censored at the monthly observation
+> frequency and already moves nearly every month.
+
+**Closing the loop (Table 10).** Feeding each category's *model-calibrated* τ\*
+through the P2 simulator on the test window yields 10–14 repricings and 5.7–7.2%
+mean real-price deviation — within a point of the empirical-knee τ = 6% result,
+and far better than observed pricing (25 changes, 10–15% deviation). The
+theory-derived and data-derived thresholds agree.
 
 ---
 
@@ -508,7 +560,7 @@ pip install -r requirements.txt
 python -m ipykernel install --user --name argentina-hotels --display-name "Python (argentina-hotels)"
 # run from the repository root:
 jupyter nbconvert --to notebook --execute --inplace \
-    --ExecutePreprocessor.kernel_name=argentina-hotels [0-9]*.ipynb        # 01 -> 10, ~2 min
+    --ExecutePreprocessor.kernel_name=argentina-hotels [0-9]*.ipynb        # 01 -> 11, ~2 min
 ```
 
 * `data/raw/**` is never modified. `data/processed/**` is git-ignored and fully
@@ -533,15 +585,18 @@ jupyter nbconvert --to notebook --execute --inplace \
 | `08_threshold_backtest` | 5, 6 | Tables 5–6, `pareto_frontier.csv`, `lambda_sweep.csv`, Charts 7–8, `08_frontier_robustness` |
 | `09_heterogeneity_and_policy` | 8, 10 | Table 7, Chart 6, decision-tree Chart 9 |
 | `10_robustness` | 9 | `robustness_matrix.csv`, `robustness_regime.csv` |
+| `11_menu_cost_model` | (theory) | Tables 8–10, Charts 10–11 — Sheshinski–Weiss (s, S) calibration + scaling-law test |
 
 ### Tables (`outputs/tables/`)
 
 `table1_descriptives` · `table2_regime_behaviour` · `table3_passthrough` ·
 `table4_elasticity` · `table5_threshold_sim` · `table6_out_of_sample` ·
-`table7_category_policy` — plus `price_adjustment_by_category`, `regime_tests`,
-`identification_summary`, `pareto_frontier`, `lambda_sweep`, `robustness_matrix`,
-`robustness_regime`, `coverage_by_category`, `data_dictionary`,
-`missing_value_map`, `outlier_register`, `table_policy_example`.
+`table7_category_policy` · `table8_menu_cost_calibration` ·
+`table9_scaling_law` · `table10_model_tau_backtest` — plus
+`price_adjustment_by_category`, `regime_tests`, `identification_summary`,
+`pareto_frontier`, `lambda_sweep`, `robustness_matrix`, `robustness_regime`,
+`coverage_by_category`, `data_dictionary`, `missing_value_map`,
+`outlier_register`, `table_policy_example`.
 
 ### Charts (`outputs/figures/`)
 
@@ -554,6 +609,8 @@ jupyter nbconvert --to notebook --execute --inplace \
 7 `08_chart7_frontier` — the repricing frontier + knee
 8 `08_chart8_backtest` — dynamic repricing vs mechanical indexing, test window
 9 `09_chart9_decision_tree` — the rule
+10 `11_chart10_model_vs_empirical` — menu-cost model τ\* vs the fitted knee
+11 `11_chart11_scaling_law` — price-change size ∝ π^{1/3}, frequency does not
 
 Diagnostics: `03_indec_crosscheck`, `03_composite_check`, `04_erosion_clock`,
 `04_sample_map`, `05_cumulative_passthrough`, `06_identification`,

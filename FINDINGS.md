@@ -87,6 +87,17 @@ What hotels actually did, over the same window: **21 price changes, real-price
 deviation 16%, CV 15%**. Every threshold τ tracked the real price **~2× tighter**
 at a similar or lower change count.
 
+### A menu-cost (s, S) foundation (notebook 11)
+
+The trigger is the canonical **Sheshinski–Weiss (1977)** menu-cost rule: an
+(s, S) band of width `w* = (12·κ·π/b)^{1/3}`, repriced when cumulative inflation
+reaches τ = w\*. Calibrated to the observed (deseasonalised) price-change size it
+predicts **τ\* ≈ 6.3%** (4.8–9.3% by tier) — matching the fitted knee. Its sharp
+prediction that price-change **size ∝ π^{1/3}** holds in the data almost exactly
+(estimated inflation-elasticity **0.33**, CI [0.17, 0.49]); the companion
+prediction that **frequency ∝ π^{2/3}** is rejected (elasticity ≈ 0). Inflation
+is absorbed on the size margin — the structural version of §2.
+
 ## 6 · Out-of-sample backtest (train 2018-19 + 2022 · validate 2023 · test 2024-01…2026-05)
 
 Freezing **τ* = 6%** from the selection window and evaluating on the untouched

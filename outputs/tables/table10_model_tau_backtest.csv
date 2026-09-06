@@ -1,0 +1,13 @@
+hotel_category,label,rule,tau_pct,n_reprice,mean_abs_real_dev_pct,revpar_vs_obs_pct
+stars_1_2,1-2 star,P2 τ*_model,4.8,14,5.7,-2.5
+stars_1_2,1-2 star,P2 τ=6% (empirical knee),6.0,14,5.8,-2.5
+stars_1_2,1-2 star,observed,,25,9.6,0.0
+stars_3,3 star,P2 τ*_model,5.8,13,5.9,1.4
+stars_3,3 star,P2 τ=6% (empirical knee),6.0,14,5.8,1.5
+stars_3,3 star,observed,,25,11.6,0.0
+stars_4,4 star,P2 τ*_model,5.2,13,5.7,0.3
+stars_4,4 star,P2 τ=6% (empirical knee),6.0,14,5.8,0.2
+stars_4,4 star,observed,,25,10.3,0.0
+stars_5,5 star,P2 τ*_model,9.2,10,7.2,1.1
+stars_5,5 star,P2 τ=6% (empirical knee),6.0,14,5.8,2.0
+stars_5,5 star,observed,,25,14.6,0.0

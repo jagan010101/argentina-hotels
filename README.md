@@ -74,9 +74,11 @@ src/pricing_eval.py           policy scoring, λ-objective, Pareto frontier
 08_threshold_backtest.ipynb          Parts 5 & 6 — frontier + knee, λ sweep, Table 6, Charts 7-8
 09_heterogeneity_and_policy.ipynb    Parts 8 & 10 — Table 7, Chart 6, decision tree (Chart 9)
 10_robustness.ipynb                  Part 9  — robustness matrix
+11_menu_cost_model.ipynb             theory  — Sheshinski–Weiss (s,S) calibration
+                                             + scaling-law test (Tables 8-10, Charts 10-11)
 
-outputs/figures/   Charts 1-9 + diagnostics (18 PNG @ 200 dpi)
-outputs/tables/    Tables 1-7 + supporting CSVs (19 files)
+outputs/figures/   Charts 1-11 + diagnostics (20 PNG @ 200 dpi)
+outputs/tables/    Tables 1-10 + supporting CSVs (22 files)
 ```
 
 The numbered notebooks sit in the repository root and **must be run from the
@@ -94,7 +96,7 @@ python -m ipykernel install --user --name argentina-hotels --display-name "Pytho
 
 # from the repository root:
 jupyter nbconvert --to notebook --execute --inplace \
-    --ExecutePreprocessor.kernel_name=argentina-hotels [0-9]*.ipynb      # 01 → 10, ~2 min
+    --ExecutePreprocessor.kernel_name=argentina-hotels [0-9]*.ipynb      # 01 -> 11, ~2 min
 ```
 
 Each notebook reads the previous notebook's parquet from `data/processed/`.
@@ -112,6 +114,11 @@ Backtested, this roughly **halves the number of price changes** versus repricing
 every month, holds the real rate within **~6%** of target (versus ~11–16% for
 observed pricing), and leaves revenue essentially unchanged — out-of-sample and
 across robustness checks.
+
+The trigger is the canonical **Sheshinski–Weiss (s, S) menu-cost rule**
+(notebook 11): its calibrated τ\* (≈ 6.3%) matches the fitted knee, and its
+scaling law — price-change *size* ∝ π^{1/3} — holds in the data (estimated
+elasticity 0.33), while *frequency* does not respond.
 
 ## Limitations
 
