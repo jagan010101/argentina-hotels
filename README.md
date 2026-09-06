@@ -64,26 +64,26 @@ src/common.py                 parsing helpers + idempotent audit log
 src/policies.py               repricing-policy engine  (P0/P1/P2/P3; strict t-1 info set)
 src/pricing_eval.py           policy scoring, λ-objective, Pareto frontier
 
-notebooks/
-  01_load_data                structural extraction of the government sheets
-  02_clean_data               coercion, missing-value classification, CPI deflators
-  03_merge_data               panel + inflation transforms + composite Total + splits
-  04_descriptive_inflation_story   Part 1  — Charts 1-2, erosion clock, Table 1
-  05_repricing_behaviour           Parts 2 & 7 — Tables 2-3, regime tests, Charts 3-4
-  06_demand_and_identification     Part 3  — elasticity (Table 4), IV scrutiny, Chart 5
-  07_pricing_policies              Part 4  — P0-P3, revenue-optimum degeneracy
-  08_threshold_backtest            Parts 5 & 6 — frontier + knee, λ sweep,
-                                   out-of-sample Table 6, Charts 7-8
-  09_heterogeneity_and_policy      Parts 8 & 10 — Table 7, Chart 6, decision tree (Chart 9)
-  10_robustness                    Part 9  — robustness matrix
+01_load_data.ipynb                   structural extraction of the government sheets
+02_clean_data.ipynb                  coercion, missing-value classification, CPI deflators
+03_merge_data.ipynb                  panel + inflation transforms + composite Total + splits
+04_descriptive_inflation_story.ipynb Part 1  — Charts 1-2, erosion clock, Table 1
+05_repricing_behaviour.ipynb         Parts 2 & 7 — Tables 2-3, regime tests, Charts 3-4
+06_demand_and_identification.ipynb   Part 3  — elasticity (Table 4), IV scrutiny, Chart 5
+07_pricing_policies.ipynb            Part 4  — P0-P3, revenue-optimum degeneracy
+08_threshold_backtest.ipynb          Parts 5 & 6 — frontier + knee, λ sweep, Table 6, Charts 7-8
+09_heterogeneity_and_policy.ipynb    Parts 8 & 10 — Table 7, Chart 6, decision tree (Chart 9)
+10_robustness.ipynb                  Part 9  — robustness matrix
 
 outputs/figures/   Charts 1-9 + diagnostics (18 PNG @ 200 dpi)
 outputs/tables/    Tables 1-7 + supporting CSVs (19 files)
 ```
 
-Core logic (the policy engine and its scoring) lives in `src/policies.py` and
-`src/pricing_eval.py`, not in the notebooks. `linearmodels` and `patsy` are
-required (notebooks 06 and 05/10).
+The numbered notebooks sit in the repository root and **must be run from the
+repository root** (each does `sys.path.insert(0, "src")` and reads
+`data/processed/`). Core logic (the policy engine and its scoring) lives in
+`src/policies.py` and `src/pricing_eval.py`, not in the notebooks.
+`linearmodels` and `patsy` are required (notebooks 06 and 05/10).
 
 ## Reproduce
 
@@ -91,8 +91,10 @@ required (notebooks 06 and 05/10).
 python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 python -m ipykernel install --user --name argentina-hotels --display-name "Python (argentina-hotels)"
+
+# from the repository root:
 jupyter nbconvert --to notebook --execute --inplace \
-    --ExecutePreprocessor.kernel_name=argentina-hotels notebooks/*.ipynb      # 01 → 10, ~2 min
+    --ExecutePreprocessor.kernel_name=argentina-hotels [0-9]*.ipynb      # 01 → 10, ~2 min
 ```
 
 Each notebook reads the previous notebook's parquet from `data/processed/`.

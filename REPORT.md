@@ -3,8 +3,8 @@
 
 **Project report.** Analysis level: *Buenos Aires City × hotel category × month*
 (aggregate official statistics — not individual-hotel dynamic pricing). All
-figures are reproduced by `notebooks/01–10`; every table and chart cited is in
-`outputs/`.
+figures are reproduced by the numbered notebooks `01`–`10` in the repository
+root; every table and chart cited is in `outputs/`.
 
 ---
 
@@ -94,7 +94,7 @@ only weakly observable (it moves most months); the analysis leans on the
 
 ### 3.2 The analysis panel
 
-`notebooks/01–03` turn the presentation-formatted spreadsheets into one clean
+Notebooks `01`–`03` turn the presentation-formatted spreadsheets into one clean
 monthly panel (`data/processed/03_analysis_panel.parquet`, 2,407 rows,
 11 categories):
 
@@ -506,8 +506,9 @@ most.
 python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 python -m ipykernel install --user --name argentina-hotels --display-name "Python (argentina-hotels)"
+# run from the repository root:
 jupyter nbconvert --to notebook --execute --inplace \
-    --ExecutePreprocessor.kernel_name=argentina-hotels notebooks/*.ipynb        # 01 → 10, ~2 min
+    --ExecutePreprocessor.kernel_name=argentina-hotels [0-9]*.ipynb        # 01 -> 10, ~2 min
 ```
 
 * `data/raw/**` is never modified. `data/processed/**` is git-ignored and fully
