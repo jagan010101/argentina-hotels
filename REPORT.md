@@ -27,8 +27,8 @@ and turns it into a rule a hotel can actually follow.
 
 *Scope: Buenos Aires City × hotel category × month — aggregate official
 statistics, not individual-hotel yield management. Every number, table and chart
-below is reproduced by the seven notebooks `01`–`07`; outputs land in
-`outputs/`.*
+below is reproduced by the seven pipeline notebooks `01`–`07` (plus an
+exploratory `08`, §13); outputs land in `outputs/`.*
 
 ---
 
@@ -413,7 +413,7 @@ real CPI path. The frozen price loses **−27%** of its real value; monthly
 indexing holds ~−3%; **the τ ≈ 6% rule fires ~10 times (vs 24 for indexing) and
 holds the real price within ~5% of target** — it does **not** break. But it is
 inflation-state-dependent only: **it has no branch that cuts the price when
-occupancy craters** (see §13).
+occupancy craters** (see §14).
 
 ---
 
@@ -580,7 +580,52 @@ increment) earns its keep.
 
 ---
 
-## 13 · What this does **not** do
+## 13 · Can demand-based ("surge") pricing sit on top? (notebook 08 — exploratory)
+
+The timing rule and demand pricing solve **two different problems**: P2 keeps the
+real price *on* its benchmark; surge pricing moves the *benchmark* with demand.
+They are separable — you can run P2 against a benchmark that shifts with demand
+instead of a fixed one. Notebook 08 prototypes the conservative version of that.
+
+**What was tested (call it P4).** Keep P2's trigger unchanged. At each reset,
+multiply the real target by `1 + tilt`, where `tilt` is built from
+panel-observable demand shifters (trailing occupancy vs its training seasonal
+norm, travellers vs norm, an occupancy-momentum "pace" proxy, a high-season
+flag), then **clamped to `[0, δ_max]`** — **upward-only** (with demand inelastic
+and no evidence that data-driven discounts recover occupancy, cuts are the risky
+direction) and **capped** at `δ_max ≤ 8%`. `δ_max = 0` reproduces P2 exactly.
+
+**Result (pooled, test window 2024-01 … 2026-05, β = −0.5):**
+
+| | price changes | mean \|real dev\| | mean occupancy | RevPAR vs observed |
+|---|---|---|---|---|
+| P2 τ = 6% | 13.8 | 5.9% | 58.0 | 0.0% |
+| **P4** (upward tilt ≤ 8%) | 13.8 | 4.9% | 57.4 | **+1.0%** |
+| observed | 25.2 | 11.2% | 57.6 | 0 (ref) |
+
+* **It does not undo the stabilisation.** Same change count, real-price control
+  unchanged (slightly tighter here — 2023–24 demand mostly ran *above* norm, so
+  tilting up moved toward the market).
+* **The revenue gain is small and entirely a function of the elasticity we
+  cannot identify.** `RevPAR(P4) − RevPAR(P2)` is a straight line in β
+  (`08_tilt_payoff.png`): at β ≈ 0 (inelastic) it is **+0.4% (1-2★) to +3.5%
+  (5★)**; at β = −1 it is **exactly zero**. There is no way, from this data, to
+  tell "captured real demand" from "just charged more" (§5).
+* **Hotels already surge harder than a capped tilt.** In peak-season months
+  (Jan–Feb, Jul) P4's RevPAR sits slightly *below* observed — real hotels raised
+  prices by more than 8% into those windows.
+
+**Verdict.** Architecturally clean, downside-capped, and it does not break P2 —
+but a **positioning lever, not a demonstrated improvement**. The panel only
+supports three thin demand signals; a genuine surge layer needs firm-level
+revenue-management data (pickup/pace curves, competitor rates, an event
+calendar), none of which is in EHOBA/INDEC. **The recommendation in §12 stands
+as the rule; any demand tilt is discretionary, applied only at resets, capped
+and upward-only.**
+
+---
+
+## 14 · What this does **not** do
 
 1. **Aggregate data.** City × category × month — this is a *category-level*
    pricing policy, not individual-hotel yield management.
@@ -620,7 +665,7 @@ increment) earns its keep.
 
 ---
 
-## 14 · Reproduce it
+## 15 · Reproduce it
 
 ```bash
 python3.12 -m venv .venv && source .venv/bin/activate
@@ -650,6 +695,7 @@ jupyter nbconvert --to notebook --execute --inplace \
 | `05_policies_and_backtest` | the policy engine, the frontier, the out-of-sample backtest, the COVID stress test | Tables 5–6, `pareto_frontier.csv`, `lambda_sweep.csv`, `covid_stress.csv`, Charts 7–8 |
 | `06_synthesis_menucost_and_rule` | one rule per category + the Sheshinski–Weiss (s, S) foundation and its scaling-law test | Table 7 & Chart 6; Tables 8–10, Charts 10–11; decision-tree Chart 9 |
 | `07_robustness` | eight variants + the COVID-inclusion note | `robustness_matrix.csv`, `robustness_regime.csv` |
+| `08_demand_tilt_exploration` | **exploratory (§13)** — can an upward-only demand tilt sit on top of P2? | `demand_tilt_backtest.csv`, `08_tilt_payoff.png` |
 
 ### Tables (`outputs/tables/`)
 
@@ -661,7 +707,7 @@ jupyter nbconvert --to notebook --execute --inplace \
 `regime_tests`, `identification_summary`, `pareto_frontier`, `lambda_sweep`,
 `robustness_matrix`, `robustness_regime`, `coverage_by_category`,
 `data_dictionary`, `missing_value_map`, `outlier_register`,
-`table_policy_example`.
+`table_policy_example`, `demand_tilt_backtest` (§13, exploratory).
 
 ### Charts (`outputs/figures/`)
 
@@ -684,6 +730,9 @@ jupyter nbconvert --to notebook --execute --inplace \
 `02_occupancy`, `02_price_change_dist`, `02_passthrough_scatter`,
 `02_capacity`, `02_correlations`, `02_argentina_vs_india_inflation`,
 `02_currency_erosion`.
+
+**Exploratory (notebook 08, §13):** `08_tilt_payoff` — surge-tilt payoff vs the
+unidentified elasticity.
 
 **Diagnostics:** `03_indec_crosscheck`, `03_composite_check`, `04_erosion_clock`,
 `04_sample_map`, `05_cumulative_passthrough`, `06_identification`,
