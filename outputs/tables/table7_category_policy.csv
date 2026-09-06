@@ -1,0 +1,6 @@
+hotel_category,label,passthrough_beta,passthrough_t,freq_change_gt_1pct,mean_abs_change_pct,share_up,elasticity_loglog,elasticity_t,knee_tau_pct,reprice_p1,reprice_p2,reprice_cut_vs_p1_pct,madev_p2_pct,madev_obs_pct,revpar_p2_vs_obs_pct
+stars_1_2,1-2 star,0.88,7.36,0.93,6.71,0.8,0.85,8.87,6.0,25,14,44.0,5.84,9.59,-2.53
+stars_3,3 star,0.82,4.37,0.9,8.14,0.74,0.1,0.57,6.0,25,14,44.0,5.84,11.6,1.46
+stars_4,4 star,1.08,6.4,0.9,7.58,0.8,0.3,2.07,6.0,25,14,44.0,5.84,10.3,0.24
+stars_5,5 star,1.23,4.23,0.94,10.56,0.64,0.14,1.0,6.0,25,14,44.0,5.84,14.6,1.96
+total_composite,Total (composite),,,,,,,,6.0,25,13,48.0,6.04,9.98,-1.11

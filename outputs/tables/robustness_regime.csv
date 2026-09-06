@@ -1,0 +1,4 @@
+variant,magnitude_coef,magnitude_p,asymmetry_coef,asymmetry_p,frequency_coef,frequency_p
+GBA CPI / room occ,4.393,0.0,0.194,0.0,0.088,0.002
+national CPI,4.365,0.0,0.213,0.0,0.089,0.0019
+bed occupancy,4.393,0.0,0.194,0.0,0.088,0.002

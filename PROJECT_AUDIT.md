@@ -3,7 +3,16 @@
 **Date:** 2026-09-06
 **Purpose:** inventory the existing project, grade its results, and lay out the
 changes needed to turn it into *"Inflation-Aware Dynamic Repricing Policy for
-Buenos Aires Hotels."* **No code has been changed yet.**
+Buenos Aires Hotels."*
+
+> **STATUS: reframe complete.** All changes in §5–§6 were carried out.
+> Notebooks 01–02 unchanged; 03 extended (composite Total, sample/split flags);
+> 04–10 rewritten to the repricing-timing question; policy engine extracted to
+> `src/policies.py` + `src/pricing_eval.py`; the invalid IV instrument dropped
+> (elasticity now labelled associational); threshold τ derived from the frontier
+> knee (≈ 6%), not inherited. Headline results → [`FINDINGS.md`](FINDINGS.md).
+> Old notebooks (`04_descriptive_analysis` … `09_results_and_recommendation`)
+> removed. What follows is the pre-work audit as written.
 
 Bottom line: **~70% of the existing pipeline is reusable.** The data layer
 (notebooks 01–03), the descriptive inflation story, the price-adjustment /

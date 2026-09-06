@@ -1,73 +1,82 @@
-# Dynamic Pricing Under Inflation — Buenos Aires Hotels
+# When should a hotel change its price?
+### Dynamic pricing under inflation: evidence from Buenos Aires hotels
 
-Pricing & revenue-optimisation study of how Buenos Aires hotels should adjust
-room rates when inflation is high. Chain of interest:
+The project studies the **timing** of repricing for Buenos Aires hotel
+categories under Argentine inflation: reprice too slowly and the real room rate
+erodes; reprice too often and you pay operational / customer friction. It builds
+and backtests an **inflation-aware, state-dependent repricing rule** and
+compares it to doing nothing, to mechanical monthly CPI indexing, and to what
+hotels actually did.
 
-> inflation → nominal room rate → occupancy → revenue
-
-**Status:** complete end-to-end (notebooks 01–09). Full pipeline reproduces from
-`data/raw/` in ~1.5 min. Headline results and the recommended rule are in
-[`FINDINGS.md`](FINDINGS.md) and notebook 09. No causal elasticity is claimed —
-see notebook 06b for what the data can and cannot identify.
+**Headline results & the recommended rule → [`FINDINGS.md`](FINDINGS.md).**
+Reframing history & method notes → [`PROJECT_AUDIT.md`](PROJECT_AUDIT.md).
+Source-data structure → [`DATA_AUDIT.md`](DATA_AUDIT.md).
 
 ---
 
-## Data sources (all official, `data/raw/`, read-only)
+## Data (all official, `data/raw/`, read-only)
 
-| File | Series | Freq | Span | Notes |
-|---|---|---|---|---|
-| `Ehoba_03a_0811.xlsx` | Average room rate by category (**tarifa promedio, pesos**) | monthly | 2008-01 … 2026-05 | the price variable; **no "Total" column** |
-| `Ehoba_02a_0811.xlsx` | Room-occupancy rate (%) | monthly | 2008-01 … 2026-05 | Hostel room-occ never published |
-| `Ehoba_04_0811.xlsx` | Bed/place-occupancy rate (%) | monthly | 2008-01 … 2026-05 | |
-| `Ehoba_VA_0811.xlsx` | Travellers hosted (persons) | monthly | 2013-01 … 2026-05 | hotel sector only, excl. para-hotels |
-| `Ehoba_1_ano.xlsx` | Establishments, available room-nights, bed-nights | **quarterly** | 2008 … 2026-03 | 2/yr → 3/yr → 4/yr snapshots; 2008 uses older EOH taxonomy |
-| `sh_ipc_08_26.xls` | INDEC IPC, base **dic-2016 = 100** | monthly | GBA 2016-04 … / national 2016-12 … 2026-07 | no pre-2016 CPI exists |
+| File | Series | Freq | Span |
+|---|---|---|---|
+| `Ehoba_03a_0811.xlsx` | average room rate by category (**tarifa promedio, pesos**) | monthly | 2008-01 … 2026-05 |
+| `Ehoba_02a_0811.xlsx` | room-occupancy rate (%) | monthly | 2008-01 … 2026-05 |
+| `Ehoba_04_0811.xlsx` | bed-occupancy rate (%) | monthly | 2008-01 … 2026-05 |
+| `Ehoba_VA_0811.xlsx` | travellers hosted | monthly | 2013-01 … 2026-05 |
+| `Ehoba_1_ano.xlsx` | establishments, available room-/bed-nights | quarterly | 2008 … 2026-03 |
+| `sh_ipc_08_26.xls` | INDEC IPC, base **dic-2016 = 100**, GBA + national + divisions | monthly | GBA 2016-04 … 2026-07 |
 
-Source: Instituto de Estadística y Censos de la Ciudad de Buenos Aires (EHOBA)
-and INDEC (Dirección Nacional de Estadísticas de Precios). See `DATA_AUDIT.md`
-for the full structural audit of every sheet.
+Sources: Instituto de Estadística y Censos de la Ciudad de Buenos Aires (EHOBA)
+and INDEC. Analysis is at **Buenos Aires City × hotel category × month** —
+aggregate, not individual hotels.
 
-## Key decisions (see `DATA_AUDIT.md` §10)
+## Framing & key choices
 
-* **Analysis window `2016-12 → 2026-05`** — the span with official CPI. Pre-2016
-  hotel data is retained for descriptive *nominal* charts only, never deflated.
-* **Deflator:** IPC **Región GBA** primary; IPC **Total nacional** as a
-  robustness check. Base dic-2016 = 100 → real rates in constant dic-2016 pesos.
-* **Revenue, not profit** — no cost/wage data supplied.
-* **Categories modelled:** 1-2★, 3★, 4★, 5★ (core) + Apart, Boutique (secondary);
-  a capacity-weighted composite stands in for "all hotels". Hostel/Otros not modelled.
-* **COVID** `2020-03 … 2021-12` is a hard data hole; `2022` is a degraded
-  recovery year (1-2★ missing). Both flagged; excluded from fitting, robustness
-  runs keep 2022.
+* **Sample:** main analysis **2018-01 … 2019-12 + 2022-01 … 2026-05**;
+  **COVID 2020-21 held out**; 2008–2017 for long-run nominal context only.
+* **Deflator:** IPC **Región GBA** (national as robustness), base dic-2016 = 100.
+  `RealRate = Nominal / CPIIndex × 100`.
+* **Cumulative inflation since the last repricing** is compounded
+  `Π(1+π_s) − 1`, not summed.
+* **Repricing threshold grid** τ ∈ {1,2,3,4,5,6,7,8,10}% — the efficient τ is
+  *derived from the frontier*, not assumed.
+* **No marginal-cost data** → we compare policies on the
+  frequency / real-stability / occupancy / revenue trade-off and report the
+  Pareto frontier; **no profit- or revenue-maximising price is claimed**.
+* **Occupancy elasticity is not causally identified** → policy sims run across
+  an assumed-β grid {0, −0.25, −0.5, −1.0}.
+* **"Total"** has no rate column in the source → a capacity-weighted
+  `total_composite` is built in notebook 03 (quarterly weights; derived).
 
-## Pipeline
+## Repository
 
 ```
-data/raw/*.xlsx,*.xls
-   │  notebooks/01_load_data.ipynb      structural extraction → data/processed/01_loaded/*.parquet
-   │  notebooks/02_clean_data.ipynb     coercion, missing-reason, outlier register
-   │                                    → 02_panel_long / 02_capacity_quarterly / 02_cpi_monthly .parquet
-   │  notebooks/03_merge_data.ipynb     CPI merge, inflation, real rates, seasonality,
-   │                                    COVID flags, capacity as-of, revenue proxy
-   ▼                                    → data/processed/03_analysis_panel.parquet  + checkpoint diagnostics
-notebooks/04_descriptive_analysis.ipynb   Plots 1–9, Table 1, COVID shading
-notebooks/05_price_adjustment.ipynb       price-change distribution, regression pass-through
-                                          (Table 2), inflation regimes, Chart B
-notebooks/06_elasticity.ipynb             occupancy vs real rate: log-log / lag / levels /
-                                          logit specs (Table 3), endogeneity discussion, Chart C
-notebooks/06b_identification.ipynb        YoY-diff / relative-price panel / 2SLS / predetermined-
-                                          lag attempts at a causal elasticity
-notebooks/07_dynamic_pricing.ipynb        constant-elasticity demand, degenerate revenue optimum,
-                                          policy paths A/B/C/D, Charts D & E
-notebooks/08_backtest.ipynb               no-look-ahead backtest of repricing rules
-                                          (train<=2019 / val 2022 / test 2023-26), Tables 4 & 5,
-                                          repricing-frequency trade-off, Chart F
-notebooks/09_results_and_recommendation.ipynb   Tables 1–5 + Charts A–F assembled,
-                                          Part-14 economic interpretation, the recommended rule
+data/raw/                     source spreadsheets (never modified)
+data/processed/               parquet panels + cleaning_audit_log.csv  (reproducible)
+
+src/config.py                 paths, windows, threshold/λ/β grids, split
+src/common.py                 parsing helpers + idempotent audit log
+src/policies.py               repricing-policy engine  (P0/P1/P2/P3; t-1 info set)
+src/pricing_eval.py           policy scoring, λ-objective, Pareto frontier
+
+notebooks/
+  01_load_data                structural extraction of the government sheets
+  02_clean_data               coercion, missing-value classification, CPI deflators
+  03_merge_data               panel + inflation transforms + composite Total + splits
+  04_descriptive_inflation_story   Part 1  — Charts 1-2, erosion clock, Table 1
+  05_repricing_behaviour           Parts 2 & 7 — Tables 2-3, regime tests, Charts 3-4
+  06_demand_and_identification     Part 3  — elasticity (Table 4), IV scrutiny, Chart 5
+  07_pricing_policies              Part 4  — P0-P3, revenue-optimum degeneracy
+  08_threshold_backtest            Parts 5 & 6 — frontier + knee, λ sweep,
+                                   out-of-sample Table 6, Charts 7-8
+  09_heterogeneity_and_policy      Parts 8 & 10 — Table 7, Chart 6, decision tree (Chart 9)
+  10_robustness                    Part 9  — robustness matrix
+
+outputs/figures/   Charts 1-9 + diagnostics (200 dpi PNG)
+outputs/tables/    Tables 1-7 + supporting CSVs
 ```
 
-Shared config and parsing helpers: `src/config.py`, `src/common.py` (imported by
-the notebooks; not run directly).
+Core logic (the policy engine and its scoring) lives in `src/policies.py` and
+`src/pricing_eval.py`, not in the notebooks.
 
 ## Reproduce
 
@@ -76,38 +85,28 @@ python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 python -m ipykernel install --user --name argentina-hotels --display-name "Python (argentina-hotels)"
 jupyter nbconvert --to notebook --execute --inplace \
-    --ExecutePreprocessor.kernel_name=argentina-hotels \
-    notebooks/0*.ipynb          # runs 01 → 09 in order (~1.5 min)
+    --ExecutePreprocessor.kernel_name=argentina-hotels notebooks/*.ipynb      # 01 → 10, ~2 min
 ```
 
-Or open the notebooks in Jupyter and run top-to-bottom; each reads the parquet
-outputs of the previous one from `data/processed/`.
+Each notebook reads the previous notebook's parquet from `data/processed/`.
+Every cleaning / modelling decision is appended to
+`data/processed/cleaning_audit_log.csv` (idempotent per notebook).
 
-Every cleaning decision is appended to `data/processed/cleaning_audit_log.csv`
-(idempotent per notebook). Outputs land in `outputs/figures/` and `outputs/tables/`.
+## The rule (see Chart 9 / FINDINGS.md)
 
-## Outputs
+> Each month, compute cumulative CPI inflation since your last price change.
+> Below **τ\* ≈ 6%** (4–7% band; top of the band for 4–5★) → **hold**. At or
+> above τ\* → **reset** the price to restore the target real rate, optionally
+> tilting by whether occupancy is above / at / below its seasonal norm.
 
-`outputs/tables/` (14 CSVs): `data_dictionary`, `missing_value_map`,
-`coverage_by_category`, `outlier_register`, `table1_descriptives`,
-`price_adjustment_stats`, `table2_passthrough`, `passthrough_by_regime`,
-`table3_elasticity`, `elasticity_robustness`, `identification_summary`,
-`table4_policy_comparison`, `table5_out_of_sample`, `backtest_robustness`.
+Backtested, this roughly **halves the number of price changes** versus repricing
+every month, holds the real rate within **~6%** of target (versus ~11–16% for
+observed pricing), and leaves revenue essentially unchanged — out-of-sample and
+across robustness checks.
 
-`outputs/figures/` (24 PNGs @ 200 dpi): Plots 1–9 (`04_*`), presentation
-Charts A–F (`09_chartA`, `05_chartB`, `06_chartC`, `07_chartD`,
-`08_chartE`, `08_chartF`), plus diagnostic figures for each stage.
+## Limitations
 
-`data/processed/`: `01_loaded/*.parquet` (raw tables, tidy), `02_panel_long`,
-`02_capacity_quarterly`, `02_cpi_monthly`, `03_analysis_panel` (the modelling
-table), and `cleaning_audit_log.csv` (every transformation, idempotent per notebook).
-
-## Limitations (running list)
-
-* No official CPI before 2016-12 → ~90 clean months per category (≈78 excluding
-  the full COVID disruption). Small sample for regime splits.
-* Capacity is quarterly; monthly revenue figures are explicitly `*_proxy`.
-* `Restaurantes y hoteles` CPI is a consumer-price division, not a cost index —
-  no profit optimisation.
-* Raw price/occupancy correlation is positive (demand-driven) — causal
-  interpretation of elasticity requires the controls and caveats in notebook 06.
+Aggregate category data; no official CPI pre-2016 (~77 clean months/category);
+occupancy elasticity associational only; no cost data (revenue trade-off, not
+profit); repricing *frequency* only weakly observable from category-mean rates;
+COVID 2020-21 held out; composite "Total" is a construction.
