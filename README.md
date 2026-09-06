@@ -60,7 +60,8 @@ data/raw/                     source spreadsheets (never modified, read-only)
 data/processed/               parquet panels + cleaning_audit_log.csv  (git-ignored, reproducible)
 
 src/config.py                 paths, windows, threshold/λ/β grids, backtest split
-src/common.py                 parsing helpers + idempotent audit log
+src/common.py                 text/number helpers + idempotent audit log
+src/loaders.py                structural parsers for the six raw spreadsheets
 src/policies.py               repricing-policy engine  (P0/P1/P2/P3; strict t-1 info set)
 src/pricing_eval.py           policy scoring, λ-objective, Pareto frontier
 
@@ -95,12 +96,19 @@ python -m ipykernel install --user --name argentina-hotels --display-name "Pytho
 
 # from the repository root:
 jupyter nbconvert --to notebook --execute --inplace \
-    --ExecutePreprocessor.kernel_name=argentina-hotels [0-9]*.ipynb      # 01 -> 06, ~3 min
+    --ExecutePreprocessor.kernel_name=argentina-hotels [0-9]*.ipynb      # 01 -> 06, ~25 s
 ```
 
 Each notebook reads the previous notebook's parquet from `data/processed/`.
 Every cleaning / modelling decision is appended to
 `data/processed/cleaning_audit_log.csv` (idempotent per notebook).
+
+**Speed.** The full chain runs in **~25 s** (`01_build_dataset` ≈ 4 s cold, ≈ 3 s
+warm; the other five ≈ 4 s each). `01_build_dataset` caches each parsed raw table
+to `data/processed/01_loaded/*.parquet` and reuses it unless the source file or a
+`src/*.py` parser changed — set `FORCE_RELOAD = True` in that notebook to force a
+re-parse. The modelling notebooks (02–06) are fast enough that they always
+recompute, which avoids stale-result bugs.
 
 ## The rule (see Chart 9 / FINDINGS.md)
 
