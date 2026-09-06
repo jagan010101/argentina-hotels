@@ -7,13 +7,14 @@ change carries operational / customer friction. The hotel therefore needs an
 **inflation-aware, state-dependent repricing rule**.
 
 Level of analysis: **Buenos Aires City × hotel category × month** (aggregate — not
-individual-hotel dynamic pricing). Deflator: **IPC Región GBA** (national as
+individual-hotel dynamic pricing). Deflator: **CPI, GBA region** (national as
 robustness), base dic-2016 = 100. Main sample **2018-01…2019-12 + 2022-01…2026-05**;
 **COVID 2020-21 held out**. Categories: 1-2★, 3★, 4★, 5★, plus a capacity-weighted
 **Total (composite)**. No marginal-cost data → we compare *policies* and map the
 *trade-off*; we do **not** claim a profit- or revenue-maximising price.
 
-Every number below is reproduced by notebooks `02`–`06`.
+Every number below is reproduced by notebooks `03`–`07` (`02_data_overview` is a
+non-modelling visual tour of the panel).
 
 ---
 
@@ -51,7 +52,7 @@ inflation through fully or slightly over; **3★ is the laggard**.
 
 The naive elasticity is **positive or ~zero** (1-2★ +0.85, 3★ +0.10, 4★ +0.30,
 5★ +0.14; Table 4) — the wrong sign for a demand curve, because hotels raise real
-prices *into* strong demand. Identification attempts (notebook 03):
+prices *into* strong demand. Identification attempts (notebook 04):
 
 * **relative-price panel** (tier vs cross-tier mean, month + category FE): β = **+0.07** — no downward relative demand response.
 * **2SLS** with a housing/utilities operating-cost instrument: first stages weak (F ≈ 2–17) and the over-ID test is rejected for the categories where it isn't weak. The previously-used "Restaurants & hotels" CPI instrument was **dropped** — it mechanically contains hotel prices.
@@ -87,7 +88,7 @@ What hotels actually did, over the same window: **21 price changes, real-price
 deviation 16%, CV 15%**. Every threshold τ tracked the real price **~2× tighter**
 at a similar or lower change count.
 
-### A menu-cost (s, S) foundation (notebook 05)
+### A menu-cost (s, S) foundation (notebook 06)
 
 The trigger is the canonical **Sheshinski–Weiss (1977)** menu-cost rule: an
 (s, S) band of width `w* = (12·κ·π/b)^{1/3}`, repriced when cumulative inflation
@@ -130,7 +131,7 @@ is common. Categories differ in *how they pass through*: 3★ passes through lea
 makes the largest changes (mean \|Δln\| 10.6% vs 6.7% for 1-2★). A single τ ≈ 6%
 serves all; upper tiers can carry the top of the 4–7% band.
 
-## 8 · Robustness (notebook 06)
+## 8 · Robustness (notebook 07)
 
 | claim | verdict |
 |---|---|

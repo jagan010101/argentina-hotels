@@ -21,22 +21,23 @@ hotels actually did.
 
 | File | Series | Freq | Span |
 |---|---|---|---|
-| `Ehoba_03a_0811.xlsx` | average room rate by category (**tarifa promedio, pesos**) | monthly | 2008-01 … 2026-05 |
+| `Ehoba_03a_0811.xlsx` | average room rate by category (**pesos**) | monthly | 2008-01 … 2026-05 |
 | `Ehoba_02a_0811.xlsx` | room-occupancy rate (%) | monthly | 2008-01 … 2026-05 |
 | `Ehoba_04_0811.xlsx` | bed-occupancy rate (%) | monthly | 2008-01 … 2026-05 |
 | `Ehoba_VA_0811.xlsx` | travellers hosted | monthly | 2013-01 … 2026-05 |
 | `Ehoba_1_ano.xlsx` | establishments, available room-/bed-nights | quarterly | 2008 … 2026-03 |
-| `sh_ipc_08_26.xls` | INDEC IPC, base **dic-2016 = 100**, GBA + national + divisions | monthly | GBA 2016-04 … 2026-07 |
+| `sh_ipc_08_26.xls` | INDEC CPI, base **dic-2016 = 100**, GBA + national + divisions | monthly | GBA 2016-04 … 2026-07 |
+| `India_CPI/` | World Bank WDI `FP.CPI.TOTL.ZG` — India CPI inflation (annual %), context only (`02_data_overview`) | annual | 1960 … 2025 |
 
-Sources: Instituto de Estadística y Censos de la Ciudad de Buenos Aires (EHOBA)
-and INDEC. Analysis is at **Buenos Aires City × hotel category × month** —
-aggregate, not individual hotels.
+Sources: Buenos Aires City Statistics and Census Institute (EHOBA) and INDEC.
+Analysis is at **Buenos Aires City × hotel category × month** — aggregate, not
+individual hotels.
 
 ## Framing & key choices
 
 * **Sample:** main analysis **2018-01 … 2019-12 + 2022-01 … 2026-05**;
   **COVID 2020-21 held out**; 2008–2017 for long-run nominal context only.
-* **Deflator:** IPC **Región GBA** (national as robustness), base dic-2016 = 100.
+* **Deflator:** CPI, **GBA region** (national as robustness), base dic-2016 = 100.
   `RealRate = Nominal / CPIIndex × 100`.
 * **Cumulative inflation since the last repricing** is compounded
   `Π(1+π_s) − 1`, not summed.
@@ -66,26 +67,28 @@ src/policies.py               repricing-policy engine  (P0/P1/P2/P3; strict t-1 
 src/pricing_eval.py           policy scoring, λ-objective, Pareto frontier
 
 01_build_dataset.ipynb               load · clean · merge  →  data/processed/*.parquet
-02_inflation_and_repricing.ipynb     Parts 1, 2, 7 — Charts 1-4, erosion clock, Tables 1-3, regime tests
-03_demand_and_identification.ipynb   Part 3 — elasticity (Table 4), IV scrutiny, Chart 5
-04_policies_and_backtest.ipynb       Parts 4, 5, 6 — P0-P3, frontier + knee, λ sweep,
+02_data_overview.ipynb               orientation / EDA — coverage & gaps, the series, the inflation
+                                     environment, seasonality, category comparison (figures only)
+03_inflation_and_repricing.ipynb     Parts 1, 2, 7 — Charts 1-4, erosion clock, Tables 1-3, regime tests
+04_demand_and_identification.ipynb   Part 3 — elasticity (Table 4), IV scrutiny, Chart 5
+05_policies_and_backtest.ipynb       Parts 4, 5, 6 — P0-P3, frontier + knee, λ sweep,
                                      out-of-sample Table 6, Charts 7-8, COVID stress test
-05_synthesis_menucost_and_rule.ipynb Parts 8, 10 + theory — Table 7 & Chart 6 (heterogeneity),
+06_synthesis_menucost_and_rule.ipynb Parts 8, 10 + theory — Table 7 & Chart 6 (heterogeneity),
                                      Sheshinski–Weiss (s,S) calibration + scaling law
                                      (Tables 8-10, Charts 10-11), decision tree (Chart 9)
-06_robustness.ipynb                  Part 9 — robustness matrix + COVID-inclusion note
+07_robustness.ipynb                  Part 9 — robustness matrix + COVID-inclusion note
 
-outputs/figures/   Charts 1-11 + diagnostics (20 PNG @ 200 dpi)
+outputs/figures/   Charts 1-11 + EDA + diagnostics (30 PNG @ 200 dpi)
 outputs/tables/    Tables 1-10 + supporting CSVs (23 files)
 ```
 
-The six notebooks sit in the repository root and **must be run from the
+The seven notebooks sit in the repository root and **must be run from the
 repository root, in order** (each does `sys.path.insert(0, "src")` and reads the
 previous one's `data/processed/` output). They are consolidations of an earlier
 11-notebook pipeline; each keeps its section-level names in
 `cleaning_audit_log.csv`. Core logic (the policy engine and its scoring) lives in
 `src/policies.py` and `src/pricing_eval.py`, not in the notebooks.
-`linearmodels` and `patsy` are required (notebook 03; 02/06).
+`linearmodels` and `patsy` are required (notebook 04; 03/07).
 
 ## Reproduce
 
@@ -96,18 +99,18 @@ python -m ipykernel install --user --name argentina-hotels --display-name "Pytho
 
 # from the repository root:
 jupyter nbconvert --to notebook --execute --inplace \
-    --ExecutePreprocessor.kernel_name=argentina-hotels [0-9]*.ipynb      # 01 -> 06, ~25 s
+    --ExecutePreprocessor.kernel_name=argentina-hotels [0-9]*.ipynb      # 01 -> 07, ~30 s
 ```
 
 Each notebook reads the previous notebook's parquet from `data/processed/`.
 Every cleaning / modelling decision is appended to
 `data/processed/cleaning_audit_log.csv` (idempotent per notebook).
 
-**Speed.** The full chain runs in **~25 s** (`01_build_dataset` ≈ 4 s cold, ≈ 3 s
-warm; the other five ≈ 4 s each). `01_build_dataset` caches each parsed raw table
+**Speed.** The full chain runs in **~30 s** (`01_build_dataset` ≈ 4 s cold, ≈ 3 s
+warm; the other six ≈ 4 s each). `01_build_dataset` caches each parsed raw table
 to `data/processed/01_loaded/*.parquet` and reuses it unless the source file or a
 `src/*.py` parser changed — set `FORCE_RELOAD = True` in that notebook to force a
-re-parse. The modelling notebooks (02–06) are fast enough that they always
+re-parse. The downstream notebooks (02–07) are fast enough that they always
 recompute, which avoids stale-result bugs.
 
 ## The rule (see Chart 9 / FINDINGS.md)
@@ -123,7 +126,7 @@ observed pricing), and leaves revenue essentially unchanged — out-of-sample an
 across robustness checks.
 
 The trigger is the canonical **Sheshinski–Weiss (s, S) menu-cost rule**
-(notebook 05): its calibrated τ\* (≈ 6.3%) matches the fitted knee, and its
+(notebook 06): its calibrated τ\* (≈ 6.3%) matches the fitted knee, and its
 scaling law — price-change *size* ∝ π^{1/3} — holds in the data (estimated
 elasticity 0.33), while *frequency* does not respond.
 
@@ -134,7 +137,7 @@ occupancy elasticity associational only; no cost data (revenue trade-off, not
 profit); repricing *frequency* only weakly observable from category-mean rates;
 composite "Total" is a construction. **COVID 2020-21**: category rate series are
 `///` for 22 of 24 months, so no price-based re-estimation is possible — the
-recommended rule is *simulated* through the collapse (notebook 04 stress test:
+recommended rule is *simulated* through the collapse (notebook 05 stress test:
 it holds the real price within ~5% of target and does not break) but it is
 **validated for inflation regimes, not demand-collapse regimes**, and has no
 price-cut branch.

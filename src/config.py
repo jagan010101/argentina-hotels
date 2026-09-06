@@ -22,11 +22,11 @@ for _p in (DATA_PROCESSED, OUT_FIG, OUT_TAB):
     _p.mkdir(parents=True, exist_ok=True)
 
 # Raw source files (read-only inputs)
-F_ROOM_OCC = DATA_RAW / "Ehoba_02a_0811.xlsx"   # tasa de ocupación de habitaciones (%)
-F_RATE = DATA_RAW / "Ehoba_03a_0811.xlsx"       # tarifa promedio (pesos)  <-- price
-F_BED_OCC = DATA_RAW / "Ehoba_04_0811.xlsx"     # tasa de ocupación de plazas (%)
-F_TRAVELERS = DATA_RAW / "Ehoba_VA_0811.xlsx"   # viajeros hospedados (persons)
-F_CAPACITY = DATA_RAW / "Ehoba_1_ano.xlsx"      # establecimientos / habitaciones / plazas
+F_ROOM_OCC = DATA_RAW / "Ehoba_02a_0811.xlsx"   # room-occupancy rate (%)
+F_RATE = DATA_RAW / "Ehoba_03a_0811.xlsx"       # average room rate (pesos)  <-- price
+F_BED_OCC = DATA_RAW / "Ehoba_04_0811.xlsx"     # bed-occupancy rate (%)
+F_TRAVELERS = DATA_RAW / "Ehoba_VA_0811.xlsx"   # travellers hosted (persons)
+F_CAPACITY = DATA_RAW / "Ehoba_1_ano.xlsx"      # establishments / rooms / beds
 F_CPI = DATA_RAW / "sh_ipc_08_26.xls"           # INDEC IPC, base dic-2016 = 100
 
 # Processed outputs

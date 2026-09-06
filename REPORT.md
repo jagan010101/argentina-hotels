@@ -1,152 +1,72 @@
 # When should a hotel change its price?
 ## Dynamic pricing under inflation — evidence from Buenos Aires hotels
 
-**Project report.** Analysis level: *Buenos Aires City × hotel category × month*
-(aggregate official statistics — not individual-hotel dynamic pricing). All
-figures are reproduced by the six numbered notebooks `01`–`06` in the repository
-root; every table and chart cited is in `outputs/`.
+In **December 2023, consumer prices in Argentina rose 25% in a single month.** A
+Buenos Aires hotel that left its rate untouched that month handed its guests a
+25% discount without meaning to. Over 2018–2026 the price level multiplied
+roughly **91-fold**.
+
+When money loses value that fast, the hard question for a hotel is not *what
+price to charge*. It is *how long it can wait before it has to change the price
+again* — because every price change costs something too (staff time, re-listing
+on booking sites, annoyed repeat guests, review risk). Wait too long and
+inflation quietly eats your margin. React to every twitch and you pay the
+friction every month.
+
+This report uses eight years of official city-level data to find the sweet spot,
+and turns it into a rule a hotel can actually follow.
+
+> **The answer in one breath.** Don't chase the "right" price — you can't
+> compute one from this data, and trying to is a trap. Instead, **let cumulative
+> inflation build up to about 6% since your last change, then reset the price to
+> restore its real value.** Backtested on years the rule never saw, this makes
+> **~half as many price changes as re-pricing every month, holds the real room
+> rate about twice as steady as hotels actually managed, and leaves revenue
+> unchanged.** The 6% figure is not a fudge factor: it is what a 1977 textbook
+> model of pricing under inflation predicts once you plug in Argentina's numbers.
+
+*Scope: Buenos Aires City × hotel category × month — aggregate official
+statistics, not individual-hotel yield management. Every number, table and chart
+below is reproduced by the seven notebooks `01`–`07`; outputs land in
+`outputs/`.*
 
 ---
 
-## 1 · Executive summary
+## 1 · The problem, plainly
 
-Argentina's inflation turned hotel pricing into a moving target: over 2018–2026
-the consumer price level rose roughly **×91** (≈ 9,000%), with a monthly peak of
-**25% in December 2023**. A hotel that holds its nominal rate loses **10% of its
-real value in about two months** at the high-inflation pace. But repricing has
-operational and customer costs, so the real decision is one of **timing**: how
-much cumulative inflation to let build up before you reset the price.
+Inflation is a slow leak in the real value of any fixed price. If a hotel freezes
+its nominal rate, the purchasing power of that rate after *k* months is just
+`1 / (compounded inflation over those k months)`.
 
-Main results:
+At the **high-inflation pace in our sample (~9%/month)** a frozen rate loses
+**5% of its real value in one month and 10% in two**. Even at the calm pace
+(~2%/month) it is 10% down in about five months. Doing nothing is not a neutral
+option — it is a standing, automatic price cut.
 
-1. **Inflation changes the *size* of price moves, not the *frequency*.** In
-   high-inflation months the monthly price change is **+4.4 pp larger**
-   (p = 0.001) and **+22 pp more likely to be an increase** (p < 0.001); the
-   frequency of >1% moves rises only ~9 pp from an already ~90% base.
-2. **Pass-through of inflation into rates is ~1 and differs by tier** — 3★
-   **0.83** (the laggard), 4★ 1.08, 5★ **1.23**.
-3. **Occupancy's response to real price is not causally identified.** The naive
-   slope is positive/zero (endogeneity); a fixed-effects relative-price design
-   gives ≈ 0; instruments are weak or invalid. Demand looks **inelastic**. The
-   policy work is therefore run across an assumed-elasticity grid and is
-   near-invariant to it.
-4. **A cumulative-inflation threshold rule with τ\* ≈ 6%** (derived from the
-   repricing frontier, not assumed) **roughly halves the number of price changes
-   versus repricing every month**, holds the real rate within ~6% of target
-   (versus ~11% for what hotels actually did), and leaves revenue unchanged —
-   **out-of-sample** and across nine robustness variants.
-5. Adding an occupancy tilt (Policy 3) **did not help** out-of-sample.
-6. **The threshold has a theoretical basis.** The cumulative-inflation trigger is
-   the canonical Sheshinski–Weiss (s, S) menu-cost rule; its calibrated
-   prediction for τ\* (mean **6.3%**) coincides with the fitted knee, and its
-   sharp scaling law — price-change *size* ∝ π^{1/3} — holds in the data almost
-   exactly (estimated elasticity **0.33**), while the companion prediction for
-   *frequency* (∝ π^{2/3}) is rejected. Inflation is absorbed on the size margin.
+The obvious fix — **raise the price by last month's inflation, every month** — has
+two problems. It is a lot of price changes, each with a cost. And it only ever
+adds *last* month's number, so when inflation accelerates it is permanently a
+step behind and never closes the gap it has already opened.
 
-The recommended rule is in §7 and drawn as a decision tree in Chart 9.
+So the real decision variable is **timing**: how much cumulative inflation to
+let accumulate before you act, and — when you act — resetting the price to its
+*target real level* rather than just bolting on the latest monthly figure.
+
+Everything in this report is in service of two questions:
+
+1. **How do hotels actually cope with inflation** — and what does the data let us
+   measure cleanly (and not)?
+2. **What is the efficient waiting threshold**, does it survive an honest
+   out-of-sample test, and is there any reason to believe it beyond the fit?
 
 ---
 
-## 2 · Research question and framing
+## 2 · How bad is the inflation? (notebook 02)
 
-> **When should a Buenos Aires hotel category change its price under inflation?**
+Two high-inflation episodes fall inside the analysis window (GBA consumer price
+index):
 
-Inflation erodes the real value of a fixed nominal room rate. Reprice too slowly
-and margins/revenue erode; reprice too frequently and you incur menu /
-operational / customer-perception costs. The objective is an **inflation-aware,
-state-dependent repricing policy**, evaluated against:
-
-* **P0** — never reprice (the erosion reference);
-* **P1** — index the price to CPI every month (the mechanical benchmark);
-* **observed** — what Buenos Aires hotels actually did.
-
-Because there is **no marginal-cost data**, this report does **not** claim a
-profit- or revenue-maximising price. It maps the trade-off between repricing
-frequency, real-price stability, occupancy and revenue, and reports the
-Pareto frontier.
-
-Define, for month *t*, cumulative inflation since the last price change
-
-    R_t = Π_{s = last change+1}^{t} (1 + π_s) − 1        (compounded, not summed)
-
-The core policy family is: **reprice when `R_t ≥ τ`**, then reset the nominal
-price to restore the target real rate.
-
----
-
-## 3 · Data
-
-### 3.1 Sources (all official, `data/raw/`, read-only)
-
-| File | Series | Freq | Span |
-|---|---|---|---|
-| `Ehoba_03a_0811.xlsx` | average room rate by category (*tarifa promedio*, pesos) | monthly | 2008-01 … 2026-05 |
-| `Ehoba_02a_0811.xlsx` | room-occupancy rate (%) | monthly | 2008-01 … 2026-05 |
-| `Ehoba_04_0811.xlsx` | bed-occupancy rate (%) | monthly | 2008-01 … 2026-05 |
-| `Ehoba_VA_0811.xlsx` | travellers hosted (hotel sector) | monthly | 2013-01 … 2026-05 |
-| `Ehoba_1_ano.xlsx` | establishments, available room-/bed-nights | quarterly | 2008 … 2026-03 |
-| `sh_ipc_08_26.xls` | INDEC IPC, base dic-2016 = 100 (GBA + national + 12 divisions) | monthly | GBA 2016-04 … 2026-07 |
-
-Occupancy/rate/traveller data: *Encuesta de Ocupación Hotelera de Buenos Aires
-(EHOBA)*, Instituto de Estadística y Censos de la Ciudad de Buenos Aires. Prices
-CPI: INDEC. The full structural audit of every sheet (merged cells, header rows,
-footnotes, missing-value tokens, category-definition changes) is in
-[`DATA_AUDIT.md`](DATA_AUDIT.md).
-
-The **average rate is a category mean** (revenue per occupied room-night reported
-by hotels), not a posted/rack price — so a menu-cost "frequency of repricing" is
-only weakly observable (it moves most months); the analysis leans on the
-*magnitude*, *sign* and *pass-through* of monthly changes instead.
-
-### 3.2 The analysis panel
-
-Notebook `01_build_dataset` turns the presentation-formatted spreadsheets into
-one clean monthly panel (`data/processed/03_analysis_panel.parquet`, 2,407 rows,
-11 categories):
-
-* **CPI deflators.** `cpi_gba` = IPC Región GBA *Nivel general*, spliced from the
-  dic-2016 = 100 bridge sheet (2016-04 … 2016-11) onto the national index sheet's
-  GBA block (2016-12 …); a 0.00 index-point join at 2016-12. `cpi_nac` = Total
-  nacional. Cross-check: our month-on-month inflation recomputed from the levels
-  matches INDEC's published figure to **max 0.05 pp** over 114 months.
-* **Real rate.** `RealRate_t = NominalRate_t / CPIIndex_t × 100`, constant
-  dic-2016 pesos. GBA is the primary deflator, national a robustness check.
-* **Inflation transforms.** month-on-month, year-on-year, and 3/6/12-month
-  compounded cumulative inflation, in both percent and fraction units.
-* **Composite "Total".** The rate file has **no Total column**. A
-  capacity-weighted composite is built:
-  `rate_total = Σ_c w_c·rate_c / Σ_c w_c` over the six *hotelero* categories,
-  `w_c` = as-of quarterly available room-nights (equal weights when capacity is
-  missing). Labelled `total_composite` — derived, not an official series.
-* **Capacity** is quarterly; attached *as-of the nearest prior snapshot* in
-  `*_asof` columns with an explicit staleness lag. Revenue figures that combine
-  monthly occupancy with quarterly capacity are labelled proxies.
-
-Modelled categories: **1-2★, 3★, 4★, 5★** (core), plus Apart and Boutique where
-useful, plus the composite Total. Hostel room-occupancy is never published;
-"Otros/resto" is thin — both excluded from modelling.
-
-### 3.3 Sample windows and the COVID break
-
-| window | dates | use |
-|---|---|---|
-| long-run context | 2008-01 … 2017-12 | nominal-only charts (no official CPI) |
-| **main analysis sample** | **2018-01 … 2019-12 + 2022-01 … 2026-05** | all estimation |
-| COVID (held out) | 2020-01 … 2021-12 | tourism collapse + star-tier rates missing 2020-03 … 2021-12 |
-| backtest: train | 2018-19 + 2022 | seasonal factors, real-rate target |
-| backtest: validation | 2023 | choose τ\*, δ\* |
-| backtest: test | **2024-01 … 2026-05** | untouched until final evaluation |
-
-COVID 2020-21 is **not pooled** with normal periods. Effective clean sample ≈ 77
-months per category.
-
----
-
-## 4 · The inflation environment, 2018–2026
-
-Two high-inflation episodes fall inside the main sample (GBA IPC):
-
-| year | mean %/mo | max %/mo | Dec YoY |
+| year | avg %/month | worst month | Dec year-on-year |
 |---|---|---|---|
 | 2018 | 3.3 | 6.6 (Sep) | 47% |
 | 2019 | 3.6 | 5.8 (Sep) | 53% |
@@ -155,209 +75,237 @@ Two high-inflation episodes fall inside the main sample (GBA IPC):
 | 2024 | 7.0 | 19.6 (Jan) | 122% |
 | 2025 | 2.3 | 3.9 | 32% |
 
-* **2018–2019** — currency-crisis inflation, ~3–4%/mo.
-* **2022 → early-2024** — a sustained acceleration from ~4%/mo to double digits,
-  peaking with the **December-2023 devaluation (25.1% in one month)**, then
-  19.6% / 15.0% / 11.5% over Jan–Mar 2024.
-* **mid-2024 onward** — sharp disinflation back to ~2–3%/mo.
+* **2018–2019** — currency-crisis inflation, a steady 3–4%/month.
+* **2022 → early 2024** — a sustained acceleration from ~4%/month into double
+  digits, peaking with the **December-2023 devaluation (25% in one month)**, then
+  20% / 15% / 12% over January–March 2024.
+* **mid-2024 onward** — a sharp disinflation back to ~2–3%/month.
 
-Cumulative GBA CPI over 2018-01 → 2026-05: **×91**. The 2024–26 test window is a
-*disinflation*; the 2022–23 selection window is an *acceleration* — the two
-regimes stress the policies very differently (see §6.6, §6.8).
+**Cumulative GBA inflation, Jan 2018 → May 2026: ×91.**
 
----
+### A yardstick: Argentina vs India
 
-## 5 · Method
+To feel how extreme this is, compare a "normal" emerging-market inflation
+record. Using calendar-year average CPI (World Bank series for India; our panel
+for Argentina), anchored at 2017 = 1:
 
-### 5.1 Descriptive erosion (notebook 02, Part 1)
-
-Real hotel rates (index, first obs = 100) swung between roughly **80 and 200**
-against a flat "kept pace with CPI" line (Charts 1–2). Mechanical erosion clock:
-under a frozen nominal rate the real value after *k* months is `1 / Π(1+π)`. At
-the sample's high-inflation pace (~9%/mo) it reaches **−5% in 1 month, −10% in
-2 months**; at the low pace (~2%/mo), ~3 and ~5 months (`04_erosion_clock`).
-
-### 5.2 Repricing behaviour and pass-through (notebook 02, Parts 2 & 7)
-
-Per category: frequency of non-trivial changes, mean/median |Δln P|, mean
-positive and negative change, the p10/p90 of the change distribution, and the
-share of months the change beats CPI (`price_adjustment_by_category.csv`).
-
-**Pass-through** — `Δln P_t = α + β·Δln CPI_t + ε` (contemporaneous, Newey–West
-HAC SE, 6 lags), plus a short 0–2 distributed lag for a cumulative figure. Fitted
-per category (Table 3).
-
-**Inflation regimes** — data-driven **terciles of GBA monthly inflation** within
-the sample (cuts ≈ 2.9% and 4.6%/mo; the high tercile averages 9.6%/mo, reaching
-25%). Behaviour compared across regimes (Table 2).
-
-**Key-hypothesis test** — *"high inflation → repriced more often"* vs *"→ larger,
-more upward, higher pass-through, not more often"*. Pooled OLS over the four star
-tiers, **category fixed effects, HAC SE**:
-
-* magnitude: `|Δln P|_t = a + b·1[mid] + c·1[high] + FE`
-* asymmetry: `1[ΔP>0]_t = … + FE` (linear probability)
-* frequency: `1[|Δln P|>1%]_t = … + FE` (linear probability)
-* pass-through: `Δln P_t = β0·Δln CPI + β1·(Δln CPI·1[mid]) + β2·(Δln CPI·1[high]) + FE`
-
-### 5.3 Demand response and identification (notebook 03, Part 3)
-
-**Naive elasticity** — `ln(occ)_t = α + β·ln(RealRate)_t + γ·infl_t + Σ month
-dummies + trend + ε`, per category, HAC SE. Four specifications compared:
-log–log, log–log + lagged real rate, percentage-point levels, and **logit** (to
-respect the 0–100 bound). Table 4.
-
-**Endogeneity** is discussed explicitly (reverse causality — hotels price into
-expected demand; omitted seasonal/exchange-rate/event demand shocks; quarterly
-capacity; the fact that high-inflation months coincide with high season).
-
-**Identification attempts:**
-
-| # | design | what it removes |
+| what 1 unit of 2017 money is worth in… | India (rupee) | Argentina (peso) |
 |---|---|---|
-| A | year-on-year (12-month) differencing | fixed calendar-month seasonality |
-| B | relative-price panel: each tier vs the cross-tier monthly mean, **month + category fixed effects**, clustered SE | *every* city-wide demand shock (time effects) |
-| C | **2SLS** — endogenous `ln RealRate`, instrument = lagged log relative price of housing/utilities vs headline CPI (an operating-cost shifter); report first-stage F, Sargan/Hansen over-ID p | demand-driven price variation |
+| 2020 | 1.15 | 2.9 |
+| 2023 | 1.36 | 17.2 |
+| **2025** | **1.46** | **79** |
 
-> The earlier version's second instrument — the *"Restaurantes y hoteles"* CPI
-> division — was **dropped**: that division mechanically contains hotel prices
-> (≈ 10.8% GBA weight, mostly restaurants), so it violates the exclusion
-> restriction. Headline CPI is retained as deflator/regressor: the hotel
-> sub-component of headline CPI is ~1%, immaterial.
+**One rupee kept in 2017 buys what ₹1.46 buys in 2025. One peso buys what ~79
+pesos buy.** The peso lost real value roughly **54× faster** than the rupee over
+the same eight years. Argentine annual inflation ran **6× to 45× India's**, year
+by year (`02_argentina_vs_india_inflation.png`, `02_currency_erosion.png`).
 
-### 5.4 The policy engine (notebook 04 + `src/policies.py`, Part 4)
-
-Pure functions, unit-testable, with a **strict t−1 information set** (INDEC
-publishes month-*t* CPI in mid-month *t+1*, so a month-*t* price may use CPI
-through *t−1* only):
-
-| policy | rule |
-|---|---|
-| **P0** frozen | `P_t = P_anchor` |
-| **P1** monthly CPI | `P_t = P_{t-1}·(1 + π_{t-1})` |
-| **P2** threshold τ | hold until `CUMINF ≥ τ`; then reset to `target_real × CPI_{t-1} / 100` |
-| **P3** threshold τ + occ tilt δ | as P2, ×`(1 + δ·tanh(dev))`, `dev` = trailing-quarter occupancy vs its (training) seasonal norm |
-
-All paths are anchored so each policy **starts at the same real level** (the
-pre-COVID target = mean 2018–19 real rate), so the comparison is about *timing*,
-not the starting price.
-
-**On the revenue "optimum":** with constant-elasticity demand
-`Q(P) = Q₀(P/P₀)^β`, revenue `= P₀Q₀(P/P₀)^{1+β}` is monotone in *P* for
-β > −1 (inelastic) — so there is **no interior optimal price**; the revenue-max
-τ pins to a grid boundary (`07_revenue_curves`). This is why the analysis is the
-frequency/stability trade-off, and why occupancy enters only through the assumed
-β grid `{0, −0.25, −0.5, −1.0}`.
-
-### 5.5 Threshold optimisation and the frontier (notebook 04, Part 5)
-
-Simulate P2 over the **selection window 2022–2023** (excludes test) for
-τ ∈ {1,2,3,4,5,6,7,8,10}%, pooled across the five present categories. Record
-repricing events, mean and worst real-price deviation from target, real-price
-CV, occupancy, and revenue vs observed (Table 5).
-
-Trace the **repricing frontier** (x = repricing events, y = mean |real-price
-deviation|). The trade-off is strictly monotone, so every τ is technically
-Pareto-efficient; the **knee** is located by normalising both axes to [0,1] and
-taking the τ closest to the ideal corner. Also: an explicit
-`Objective = Revenue − λ · N_reprice · mean_revenue` swept over
-λ ∈ {0 … 0.12} (λ is an operational dial, *not* a calibrated cost).
-
-### 5.6 Backtest (notebook 04, Part 6)
-
-Seasonal occupancy factors and the real-rate target are fit on **train** only.
-τ\* (the knee) and δ\* are chosen on **validation 2023**. The frozen choice is
-evaluated on the **untouched test window 2024-01 … 2026-05**, across all β
-scenarios (Table 6). The frontier is re-drawn on the test window as a shape
-check (`08_frontier_robustness`). COVID 2020-21 is noted as a separate stress
-period where star-tier rates are missing.
+This is why every price in this report is worked in **real** (inflation-adjusted)
+terms, and why the modelling window matters: the **2022–23 "acceleration"** and
+the **2024–26 "disinflation"** are genuinely different regimes and stress the
+policy in opposite ways.
 
 ---
 
-## 6 · Results
+## 3 · The data on one page (notebook 01)
 
-### 6.1 Real-price erosion (Table 1)
+### 3.1 Sources — all official, `data/raw/`, read-only
 
-Main sample, COVID held out:
+| file | what it is | frequency | span |
+|---|---|---|---|
+| `Ehoba_03a_0811.xlsx` | average room rate by category (pesos) — **the price** | monthly | 2008-01 … 2026-05 |
+| `Ehoba_02a_0811.xlsx` | room-occupancy rate (%) | monthly | 2008-01 … 2026-05 |
+| `Ehoba_04_0811.xlsx` | bed-occupancy rate (%) | monthly | 2008-01 … 2026-05 |
+| `Ehoba_VA_0811.xlsx` | travellers hosted (hotel sector) | monthly | 2013-01 … 2026-05 |
+| `Ehoba_1_ano.xlsx` | establishments, available room-/bed-nights | quarterly | 2008 … 2026-03 |
+| `sh_ipc_08_26.xls` | INDEC CPI, base dic-2016 = 100 (GBA + national + 12 sub-indices) | monthly | GBA 2016-04 … 2026-07 |
+| `India_CPI/` | World Bank India CPI inflation (annual %) — context only | annual | 1960 … 2025 |
 
-| category | mean real rate (dic-2016 ARS) | real-rate CV | worst month (% of mean) | mean rate MoM | months rate rose | months rate beat CPI |
-|---|---|---|---|---|---|---|
-| 1-2★ | 564 | 9.8% | 78% | 4.9% | 64% | 38% |
-| 3★ | 784 | 16.4% | 67% | 6.4% | 70% | 47% |
-| 4★ | 1,231 | 13.4% | 72% | 6.5% | 75% | 51% |
-| 5★ | 3,191 | 19.0% | 69% | 6.6% | 61% | 44% |
-| Total (composite) | 1,569 | 13.9% | 75% | 7.1% | 76% | 52% |
+Hotel data: *Buenos Aires Hotel Occupancy Survey (EHOBA)*, Buenos Aires City
+Statistics and Census Institute. Prices: INDEC. The full sheet-by-sheet audit
+(merged cells, header quirks, missing-value tokens, category redefinitions) is
+in [`DATA_AUDIT.md`](DATA_AUDIT.md).
 
-Real rates are **~3× more volatile than CPI** and beat CPI in only ~half of
-months — catch-up is lumpy, concentrated around devaluation episodes.
+**One caveat that shapes everything:** the "average rate" is a **category mean**
+(roughly revenue per occupied room-night), *not* a posted or rack price. It moves
+almost every month simply because the mix of rooms sold shifts. So we cannot
+cleanly measure *how often* a hotel "changes its price" — instead we lean on the
+**size**, **direction** and **inflation pass-through** of the monthly change,
+which are informative.
 
-### 6.2 How hotels reprice, and the key hypothesis (Table 2, `regime_tests.csv`)
+### 3.2 The analysis panel
 
-Behaviour by inflation regime (pooled star tiers):
+Notebook `01_build_dataset` turns six presentation-formatted spreadsheets into
+one clean monthly table (`data/processed/03_analysis_panel.parquet`, 2,407 rows,
+11 categories):
 
-| regime | CPI %/mo | freq(|Δ|>1%) | mean |Δln rate| | median |Δln rate| | share up |
+* **Deflator.** `cpi_gba` = the GBA headline index, spliced from the dic-2016
+  bridge sheet onto the national sheet's GBA block (the join is exact, 0.00
+  index points, at 2016-12). Our month-on-month inflation recomputed from levels
+  matches INDEC's published figure to **within 0.05 pp over 114 months**.
+* **Real rate** = nominal rate ÷ CPI × 100 (constant dic-2016 pesos). GBA is
+  primary; the national index is a robustness check.
+* **Inflation transforms** — month-on-month, year-on-year, and 3/6/12-month
+  *compounded* cumulative inflation.
+* **Composite "Total".** The rate file has no "all hotels" column, so we build a
+  capacity-weighted one (weights = available room-nights). Clearly labelled
+  `total_composite` — derived, not an official series.
+* **Capacity** is quarterly and attached "as-of the nearest prior snapshot" with
+  an explicit staleness lag.
+
+Modelled: **1-2★, 3★, 4★, 5★** (core), plus Apart and Boutique where useful, plus
+the composite. Hostel room-occupancy is never published; "Other/rest" is too
+thin — both dropped from modelling.
+
+### 3.3 The windows — and the COVID hole
+
+| window | dates | role |
+|---|---|---|
+| long-run context | 2008-01 … 2017-12 | nominal-only charts (no official CPI yet) |
+| **main analysis sample** | **2018-01 … 2019-12 + 2022-01 … 2026-05** | all estimation |
+| COVID (held out) | 2020-01 … 2021-12 | tourism collapse; star-tier rates missing for 22 of 24 months |
+| backtest — train | 2018-19 + 2022 | seasonal factors, real-rate target |
+| backtest — validation | 2023 | pick the threshold τ\* and tilt δ\* |
+| backtest — test | **2024-01 … 2026-05** | untouched until the final evaluation |
+
+COVID is **never pooled** with normal months — hotels were legally barred from
+taking tourists and some housed quarantine patients, so there is no market price
+to model. Effective clean sample: **≈ 77 months per category**.
+
+---
+
+## 4 · Finding 1 — inflation makes each price move *bigger*, not more *frequent* (notebook 03)
+
+Split every month into three **inflation regimes** (low / mid / high terciles of
+GBA monthly inflation; the high tercile averages 9.6%/month and reaches 25%),
+pool the four star tiers, and look at how the monthly price change behaves:
+
+| regime | CPI %/mo | share of months with a >1% move | mean size of move | median size | share that are **increases** |
 |---|---|---|---|---|---|
 | low | 2.3 | 88% | 7.4% | 5.6% | 65% |
 | mid | 3.9 | 90% | 6.2% | 4.5% | 71% |
 | **high** | **9.6** | **98%** | **11.3%** | **10.3%** | **87%** |
 
-Formal tests (high regime vs low; category FE; HAC):
+Formal test (high regime vs low, pooled with category fixed effects and
+autocorrelation-robust standard errors, `regime_tests.csv`):
 
-| margin | coefficient | p |
+| what changes with high inflation | effect | p-value |
 |---|---|---|
-| magnitude, |Δln P| (pp) | **+3.79** | **0.0012** |
-| upward asymmetry, P(rise) | **+0.223** | **<0.001** |
-| pass-through slope | +0.928 | 0.092 |
-| frequency of >1% moves | +0.099 | 0.010 |
+| **size** of the price move | **+3.8 pp larger** | **0.001** |
+| **direction** — probability it's an increase | **+22 pp more likely up** | **<0.001** |
+| pass-through slope | +0.93 steeper | 0.09 |
+| **frequency** of >1% moves | +9 pp (from a ~90% base) | 0.01 |
 
-> **Verdict (supported):** high inflation makes each repricing *much larger*
-> (+3.8 pp) and *far more one-directional* (+22 pp). The frequency of >1% moves
-> also rises, but only ~10 pp from an already ~90% base — an order of magnitude
-> smaller than the magnitude / asymmetry response.
-> *"Inflation does not mainly make hotels reprice more often; it makes each
-> repricing decision more consequential."*
+> **Verdict (supported).** High inflation makes each repricing **much larger and
+> almost always upward**. The frequency of big moves also rises, but only ~9 pp
+> from an already ~90% base — an order of magnitude weaker than the size and
+> direction effects. *"Inflation does not mainly make hotels reprice more often;
+> it makes each repricing decision more consequential."*
 
-### 6.3 Pass-through by category (Table 3)
+This matters for the rule: since the *frequency* margin is nearly maxed out and
+barely responsive, the lever that matters is *how large a real-price gap you
+allow before you close it*.
 
-`Δln rate` on `Δln CPI`, contemporaneous, HAC SE, main sample:
+---
 
-| category | β (contemp.) | t | R² | cumulative β (0–2 lags) |
-|---|---|---|---|---|
-| 3★ | **0.83** | 4.4 | .13 | 0.66 |
-| 1-2★ | 0.88 | 7.4 | .19 | 0.79 |
-| 4★ | 1.08 | 6.4 | .28 | 0.78 |
-| Apart | 1.05 | 4.0 | .11 | 0.91 |
-| Boutique | 1.20 | 6.4 | .30 | 0.92 |
-| 5★ | **1.23** | 4.2 | .10 | 0.92 |
+## 5 · Finding 2 — you cannot watch demand react to price (notebook 04)
 
-Upper tiers pass inflation through fully or slightly over; **3★ is the laggard**
-and, consistent with §6.1, has the widest real-rate swings. Pass-through is
-identified mostly off the 2022–24 acceleration.
+If you raise the real price, does occupancy fall? We tried hard to measure this
+and the honest answer is: **not from this data.**
 
-### 6.4 Elasticity: associational, not identified (Table 4, `identification_summary.csv`)
+**The naive number.** Regress log occupancy on the log real rate (plus
+seasonality, trend, inflation), per category, four functional forms. The slope
+comes out **zero or positive everywhere** — 1-2★ +0.85, 3★ +0.10, 4★ +0.30,
+5★ +0.14, Apart +0.28, Boutique +0.12. That is the *wrong sign* for a demand
+curve, and the reason is obvious: **hotels raise real prices into strong
+demand** (holidays, events, favourable exchange-rate windows for foreign
+tourists), so price and occupancy rise together.
 
-Naive log–log β (occupancy w.r.t. real rate): 1-2★ **+0.85** (t 8.9), 3★ +0.10,
-4★ +0.30 (t 2.1), 5★ +0.14, Apart +0.28, Boutique +0.12 — **positive or zero
-everywhere**, the wrong sign for a demand curve. The logit and levels specs
-agree.
+**Three attempts to break that entanglement:**
 
-Identification:
-
-| strategy | result |
-|---|---|
-| A · YoY differencing | still positive (1-2★ +0.89, 4★ +0.43) — seasonality is not the confound |
-| B · relative-price panel, month + category FE | **β = +0.07** (t 2.3) — no downward *relative* demand response |
-| C · 2SLS (housing/utilities cost instrument) | first stages weak (F 2–17); where not weak, over-ID **rejected** (5★ p = 0.009, 3★ p = 0.000); 4★ β = −0.07 (t −0.17). No robust negative estimate. |
+| approach | idea | result |
+|---|---|---|
+| A · year-on-year differencing | remove fixed seasonal demand | still positive (1-2★ +0.89, 4★ +0.43) — seasonality is not the confound |
+| B · relative-price panel | compare tiers *within the same month* (month + category fixed effects), so every city-wide demand shock is absorbed | **β ≈ +0.07** — essentially no relative demand response |
+| C · instrumental variables | use a supply-side cost shifter (lagged housing/utilities inflation) as an instrument for the real rate | first stage weak for most tiers (F 2–17); where not weak, the over-identification test **rejects**; 4★ point estimate −0.07 (not significant) |
 
 > **Occupancy elasticity is associational, not causally identified. Demand looks
-> inelastic.** Consequently the policy simulations run across β ∈ {0, −0.25,
-> −0.5, −1.0} and, per §6.6, the ranking of policies is essentially β-invariant.
+> inelastic.** No design delivers a robust negative estimate.
 
-### 6.5 The threshold frontier and its knee (Table 5, Chart 7, `lambda_sweep.csv`)
+**Why this does not sink the project.** Two reasons:
 
-Selection window 2022–2023, pooled across categories:
+1. We were never going to claim a "revenue-maximising price" anyway. With
+   constant-elasticity, inelastic demand, revenue is *monotone* in price — there
+   is no interior optimum without marginal-cost data, which we do not have
+   (`07_revenue_curves`). So the analysis is deliberately a **timing / stability
+   trade-off**, not an optimisation.
+2. Every policy simulation is run across an **assumed-elasticity grid**
+   β ∈ {0, −0.25, −0.5, −1.0}, and — see §8 — the ranking of policies barely
+   moves across it. The policies being compared all steer toward the *same real
+   price*, so the elasticity (which acts on the price *level*) nearly cancels
+   out.
 
-| policy | repricing events | mean |real dev| | real-price CV | vs observed revenue |
+---
+
+## 6 · Finding 3 — rates roughly keep up with CPI, but lumpily (notebook 03)
+
+**Pass-through.** Regress the monthly change in log rate on the monthly change in
+log CPI (contemporaneous, HAC standard errors):
+
+| category | pass-through β | t | cumulative over 0–2 months |
+|---|---|---|---|
+| **3★** | **0.83** | 4.4 | 0.66 |
+| 1-2★ | 0.88 | 7.4 | 0.79 |
+| 4★ | 1.08 | 6.4 | 0.78 |
+| Apart | 1.05 | 4.0 | 0.91 |
+| Boutique | 1.20 | 6.4 | 0.92 |
+| **5★** | **1.23** | 4.2 | 0.92 |
+
+Upper tiers pass inflation through fully or a touch more; **3★ is the laggard**.
+
+**But the catch-up is not smooth.** Over the main sample, COVID held out:
+
+| category | mean real rate (dic-2016 ARS) | how volatile vs CPI | worst month (% of its own mean) | mean monthly move | months the rate rose | months it beat CPI |
+|---|---|---|---|---|---|---|
+| 1-2★ | 564 | CV 9.8% | 78% | 4.9% | 64% | 38% |
+| 3★ | 784 | CV 16.4% | 67% | 6.4% | 70% | 47% |
+| 4★ | 1,231 | CV 13.4% | 72% | 6.5% | 75% | 51% |
+| 5★ | 3,191 | CV 19.0% | 69% | 6.6% | 61% | 44% |
+| Total (composite) | 1,569 | CV 13.9% | 75% | 7.1% | 76% | 52% |
+
+> Real rates are **~3× more volatile than CPI** and beat CPI in only about
+> **half** of months. Hotels catch up in lumps, concentrated around devaluation
+> episodes, and let the real rate sag in between. That sag is exactly what a
+> better *timing* rule can tighten.
+
+---
+
+## 7 · The rule — optimise the *timing*, not the price (notebook 05)
+
+Since there is no "optimal price" to find, define a family of **timing rules** and
+compare them on the axes we *can* measure: number of price changes, how tightly
+the real rate is held to target, occupancy, revenue.
+
+Four candidates (in `src/policies.py`; each may use CPI only through *t−1*, since
+INDEC publishes month-*t* inflation in mid-month *t+1*):
+
+| policy | rule |
+|---|---|
+| **P0** frozen | never change the nominal price |
+| **P1** monthly CPI | raise by last month's inflation, every month |
+| **P2** threshold τ | hold until cumulative inflation since the last change ≥ **τ**, then reset the price to restore the target real rate |
+| **P3** threshold τ + tilt δ | P2, but scale the reset up/down by whether trailing occupancy is above/below its seasonal norm |
+
+Two benchmarks travel alongside: **P0** (the erosion reference) and **observed**
+(what hotels actually charged). All paths start at the same real level, so the
+comparison is purely about timing.
+
+### Deriving τ — don't guess, trace the trade-off
+
+Simulate P2 over the **2022–23 selection window** (test data excluded) for
+τ from 1% to 10%:
+
+| policy | price changes | mean real-price gap | real-price volatility (CV) | revenue vs observed |
 |---|---|---|---|---|
 | P2 τ = 1–3% | 21.6 | 7.9% | 5.1% | −10% |
 | P2 τ = 4% | 21.0 | 8.0% | 5.0% | −10% |
@@ -368,227 +316,243 @@ Selection window 2022–2023, pooled across categories:
 | P2 τ = 10% | 12.0 | 10.5% | 5.9% | −11% |
 | P0 frozen | 1.0 | 50.7% | 41.4% | −44% |
 | P1 monthly CPI | 21.6 | **16.6%** | 3.7% | −15% |
-| **observed** | 21.4 | **15.7%** | **15.3%** | 0 (ref) |
+| **observed** | 21.4 | **15.7%** | **15.3%** | 0 (reference) |
 
-Notes: (i) at τ ≤ 3% the 2022–23 inflation is so high that the threshold triggers
-every month; differentiation begins at τ ≥ 4%. (ii) the ~−10% revenue vs observed
-for the threshold rows reflects that observed pricing sat, on average, *above*
-the pre-COVID real target during 2022–23 (a real overshoot); the rows are matched
-on the *target*, not on the observed level, so this is a level effect, not a
-timing loss — the OOS test (§6.6) controls for it. (iii) the worst single-month
-real deviation is τ-invariant (≈ −26%): it is the unavoidable one-month CPI
-publication lag around the Dec-2023 spike.
+Reading it:
 
-**Knee: τ\* = 6%.** The λ-objective picks τ = 4% at λ = 0.01, 5% at λ = 0.02,
-7% at λ = 0.03 — i.e. any moderate repricing penalty lands in the **4–7% band**.
-Observed pricing is dominated on both axes (same change count as τ = 1–3%, but
-2× the real-price deviation and 3× the CV).
+* As you raise τ you make **fewer changes** (good) and let the real price
+  **drift a little further** (bad) — a smooth trade-off. The **"knee"** — the
+  point of best balance, found by normalising both axes and taking the τ closest
+  to the ideal corner — is **τ\* = 6%** (`08_chart7_frontier.png`).
+* An explicit penalty sweep (`Objective = Revenue − λ · changes`) picks τ = 4% at
+  a light penalty, 5% at a moderate one, 7% at a heavier one — i.e. **any
+  reasonable cost of repricing lands in the 4–7% band.**
+* **Observed pricing is beaten on both axes at once:** hotels changed prices as
+  often as τ = 1–3% would, yet let the real rate wander **twice as far** with
+  **three times the volatility**. The −10% "revenue vs observed" for the
+  threshold rows is a *level* effect — hotels sat above the pre-COVID real target
+  during 2022–23 — and the out-of-sample test below controls for it.
+* P1 (monthly indexing) looks tidy on volatility but its real-price gap is
+  **17%** — it keeps adding last month's number and never closes the accumulated
+  hole in an acceleration.
 
-### 6.6 Out-of-sample backtest (Table 6, Chart 8)
+---
 
-Frozen τ\* = 6%, δ\* from validation; evaluated on **2024-01 … 2026-05**, pooled
-across categories, β = −0.5:
+## 8 · Does it actually work? The out-of-sample test (notebook 05)
 
-| policy | price changes | mean |real dev| | real-price CV | RevPAR vs observed |
+Freeze τ\* = 6% and δ\* using **only 2018–2023 data**. Fit the seasonal factors
+and the real-rate target on the training years. Then run the frozen rule on the
+**2024-01 … 2026-05 window it has never seen**:
+
+| policy | price changes | mean real-price gap | real-price volatility | revenue vs observed |
 |---|---|---|---|---|
 | **P0** frozen | 1 | **53%** | 27% | −32% |
 | **P1** monthly CPI | 25 | 4.5% | 3.9% | +0.7% |
-| **P2** τ = 6% | **14** | **5.9%** | **3.7%** | +0.0% |
-| **P3** τ = 6% + occ tilt | 14 | 8.2% | 4.9% | −1.0% |
-| observed (hotels) | 25 | 11.2% | 13.3% | 0 (ref) |
+| **P2** τ = 6% | **14** | **5.9%** | **3.7%** | **+0.0%** |
+| **P3** τ = 6% + occupancy tilt | 14 | 8.2% | 4.9% | −1.0% |
+| observed (hotels) | 25 | 11.2% | 13.3% | 0 (reference) |
 
-Across β ∈ {0, −0.25, −0.5, −1.0} the revenue column stays within ±0.5 pp for
-every policy — **the ranking does not depend on the (unidentified) elasticity.**
+Across every elasticity assumption β ∈ {0, −0.25, −0.5, −1.0} the revenue column
+moves by **less than half a percentage point** — the ranking does not depend on
+the number we could not identify.
 
-> **P2 at τ ≈ 6% makes ~45% fewer price changes than monthly indexing, for the
-> same real-price control and the same revenue, and holds the real rate about
-> twice as tightly as observed pricing did at ~half the changes.**
->
-> **P3 (occupancy tilt) did not help** — 2024–25 occupancy ran below its
-> seasonal norm, so the tilt shaved the catch-up and *added* real erosion; with
-> demand inelastic there is no offsetting occupancy gain. Treat the tilt as a
-> lever, not a proven improvement.
->
-> **P1 (monthly indexing) is period-specific.** It is fine here because 2024–26
-> was a disinflation; in the 2022–23 acceleration its real-price deviation was
-> ~17% (Table 5) — it only ever adds last month's lagged print and never catches
-> up the accumulated gap.
+> **P2 at τ ≈ 6% makes ~45% fewer price changes than indexing every month, for
+> the same real-price control and the same revenue — and it holds the real rate
+> about twice as tightly as hotels actually managed, at half the number of
+> changes** (`08_chart8_backtest.png`).
 
-### 6.7 Category heterogeneity (Table 7, Chart 6)
+Two footnotes to the story:
 
-Per-category knee τ\* (each category's own 2022–23 frontier):
+* **The occupancy tilt (P3) did not help.** In 2024–25 occupancy sat *below* its
+  seasonal norm, so the tilt trimmed the catch-up and *added* real erosion; with
+  demand inelastic there is no occupancy gain to offset it. Keep it as an
+  optional lever, not a proven improvement.
+* **P1 only wins here because 2024–26 was a disinflation.** In the 2022–23
+  acceleration its real-price gap was ~17% (§7). The threshold rule's
+  *level-restoring reset* is what protects it when inflation is rising.
 
-| category | pass-through β | mean |Δln rate| | knee τ\* | OOS repricing cut vs P1 | OOS |real dev| (P2) vs observed |
+---
+
+## 9 · One rule fits every category (notebook 06)
+
+Give each category its *own* frontier and its *own* knee:
+
+| category | pass-through β | mean move size | its own knee τ\* | change-count cut vs monthly indexing (out-of-sample) | real-price gap: P2 vs observed |
 |---|---|---|---|---|---|
-| 1-2★ | 0.88 | 6.7% | 6% | −44% | 5.8% vs 9.6% |
-| 3★ | 0.82 | 8.1% | 6% | −44% | 5.8% vs 11.6% |
-| 4★ | 1.08 | 7.6% | 6% | −44% | 5.8% vs 10.3% |
-| 5★ | 1.23 | 10.6% | 6% | −44% | 5.8% vs 14.6% |
-| Total (composite) | — | — | 6% | −48% | 6.0% vs 10.0% |
+| 1-2★ | 0.88 | 6.7% | **6%** | −44% | 5.8% vs 9.6% |
+| 3★ | 0.82 | 8.1% | **6%** | −44% | 5.8% vs 11.6% |
+| 4★ | 1.08 | 7.6% | **6%** | −44% | 5.8% vs 10.3% |
+| 5★ | 1.23 | 10.6% | **6%** | −44% | 5.8% vs 14.6% |
+| Total (composite) | — | — | **6%** | −48% | 6.0% vs 10.0% |
 
-> **The *timing* rule is common — τ\* ≈ 6% for every category.** Heterogeneity is
-> in *how* categories pass through (3★ lowest at 0.83, 5★ highest at 1.23) and in
-> change size (5★ makes the largest moves), not in *when* to trigger. A single
-> τ ≈ 6% serves all; upper tiers can sit at the top of the 4–7% band.
+> **The *timing* is universal — τ\* ≈ 6% for every category.** What differs is
+> *how* they pass inflation through (3★ lowest, 5★ highest) and how big their
+> moves are (5★ largest), not *when* to act. One τ ≈ 6% serves all; the upper
+> tiers can sit at the top of the 4–7% band (`09_chart6_category.png`).
 
-### 6.8 Robustness (notebook 06, `robustness_matrix.csv`, `robustness_regime.csv`, `covid_stress.csv`)
+---
 
-| claim | verdict across variants |
+## 10 · Why believe it
+
+### 10.1 Robustness (notebook 07)
+
+Re-run the whole pipeline under eight variations — GBA vs national CPI, room vs
+bed occupancy, all four β values, drop the most extreme inflation months,
+selection = 2023 only, core tiers vs including the composite:
+
+| claim | how it holds up |
 |---|---|
-| **A** — knee τ\* in the 4–7% band | 7/8 (τ = 7% under the national CPI deflator) |
-| **B** — threshold rule beats observed pricing on real-price stability **and** change count, OOS | **8/8** |
-| **C** — monthly indexing lags in an acceleration | ~17% real-price deviation in 2022–23 (7/8); ~4.5% in the 2024–26 disinflation |
-| **D** — occupancy inelastic / not identified | holds (notebook 03) |
-| **E** — larger & more-upward changes, not mainly more frequent | magnitude & asymmetry significant 3/3; frequency effect ~9 pp, an order of magnitude smaller |
-| **F** — the rule does not break through a demand collapse | COVID stress (notebook 04): total-hotel occupancy fell **62% → 27%** over 2020-21; simulated through it, the frozen price loses **−27%** real, monthly indexing keeps ~−3%, the **τ = 6% rule fires 10× (vs 24) and holds −5%** — it holds the real price, but it is inflation-state-dependent only and has **no price-cut branch** for a demand collapse (§8). |
+| **A** — the knee τ\* sits in the 4–7% band | 7 of 8 variants (τ = 7% under the national deflator) |
+| **B** — the threshold rule beats observed pricing on **both** real-price stability **and** change count, out-of-sample | **8 of 8** |
+| **C** — monthly indexing lags in an acceleration | ~17% real-price gap in 2022–23 (7/8); ~4.5% in the 2024–26 disinflation |
+| **D** — demand inelastic / not identified | holds |
+| **E** — bigger, more-upward moves; not mainly more frequent | size & direction significant 3/3; frequency effect an order of magnitude smaller |
+| **F** — the rule does not break in a demand collapse | see COVID stress below |
 
-Variants tested: GBA ↔ national CPI; room ↔ bed occupancy; β ∈ {0, −0.25, −0.5,
-−1}; exclude-extreme-inflation months (> p90); selection = 2023 only; core star
-tiers vs including the composite.
+**COVID stress test.** Through 2020–21, total-hotel occupancy fell **62% → 27%**.
+There is no market rate to model, but we can *simulate* the policies against the
+real CPI path. The frozen price loses **−27%** of its real value; monthly
+indexing holds ~−3%; **the τ ≈ 6% rule fires ~10 times (vs 24 for indexing) and
+holds the real price within ~5% of target** — it does **not** break. But it is
+inflation-state-dependent only: **it has no branch that cuts the price when
+occupancy craters** (see §12).
 
-### 6.9 A menu-cost (s, S) foundation for the threshold (notebook 05)
+### 10.2 The kicker — the 6% is not a curve fit (notebook 06)
 
-The τ\* trigger is not ad-hoc — it is the canonical **Sheshinski & Weiss (1977) /
-Barro (1972)** menu-cost rule. A firm whose real price drifts down at the
-inflation rate π, faces a quadratic loss `L(p) = (b/2)p²` for being off its
-target real price, and pays a fixed cost `κ` per change, optimally follows an
-**(s, S) band** of width
+The threshold has a **textbook origin**. In the **Sheshinski–Weiss (1977) /
+Barro (1972) menu-cost model**, a firm whose real price drifts down at the
+inflation rate π, pays a quadratic penalty for being off its target real price,
+and a fixed cost κ per price change, optimally follows an **(s, S) band**: let
+the real price erode by a width `w*`, then reset. The algebra gives
 
-    w* = (12 · κ · π / b)^{1/3}          reset every  T* = w*/π  months,
+    w* = (12 · κ · π / b)^(1/3)         reset every  T* = w*/π  months
 
-so the cumulative inflation between resets is exactly **τ\* = w\* ∝ π^{1/3}** —
-i.e. Policy P2 *is* the (s, S) rule and τ = w\*. (Modification: the target real
-price is taken as an exogenous competitive benchmark, not a monopoly optimum,
-because there is no cost data and demand is inelastic — §6.4, §5.4.)
+and the cumulative inflation between resets is **exactly `τ* = w*`**. In other
+words, **Policy P2 *is* the (s, S) rule**, and τ is the optimal band width.
 
-**Calibration (Table 8).** The observed mean absolute (deseasonalised) log price
-change identifies `w*`; it gives τ\* ≈ **4.8% (1-2★), 5.8% (3★), 5.2% (4★),
-9.3% (5★)** — mean **6.3%**, coinciding with the empirical frontier knee of 6%
-and the λ-objective band of 4–7%. Only `κ/b` is identified (≈ 0.0002–0.0012
-months); for a literature-plausible menu cost of ~2% of monthly revenue the
-implied loss curvature is `b` ≈ 20–100 — a steep penalty for off-market real
-pricing, consistent with a competitive, OTA-mediated market.
+**Calibration.** The observed (deseasonalised) mean price-change size *identifies*
+`w*`, and it gives **τ\* ≈ 4.8% (1-2★), 5.8% (3★), 5.2% (4★), 9.3% (5★) — mean
+6.3%**, sitting right on the empirically fitted knee of 6% and inside the 4–7%
+penalty band (`11_chart10_model_vs_empirical.png`).
 
-**The scaling law (Table 9, Chart 11).** The model's sharp prediction is that the
-**size** of price changes has an inflation-elasticity of **1/3** and the
-**frequency** an elasticity of **2/3**. Estimated (pooled star tiers, across
-inflation deciles / the three regimes / 12-month rolling windows):
+**The model's sharp prediction, tested.** It says the **size** of price changes
+should scale with inflation to the power **1/3**, and the **frequency** to the
+power **2/3**:
 
-| margin | estimated elasticity | model |
+| margin | estimated inflation-elasticity (deciles / regimes / rolling) | model says |
 |---|---|---|
-| size, `ln mean|Δln P|` on `ln π` | **0.33 / 0.34 / 0.27** (decile CI [0.17, 0.49]) | **1/3** |
-| frequency, `ln P(|Δln P|>1pp)` on `ln π` | 0.06 / 0.08 / 0.06 | 2/3 |
+| **size** of the move | **0.33 / 0.34 / 0.27** (CI [0.17, 0.49]) | **1/3** ✓ |
+| **frequency** of moves | 0.06 / 0.08 / 0.06 | 2/3 ✗ |
 
-> **The size margin obeys the menu-cost law almost exactly; the frequency margin
-> does not respond at all.** In this market inflation is absorbed entirely
-> through *larger* price changes, not *more frequent* ones — the structural
-> counterpart of the descriptive finding in §6.2. The frequency elasticity is ~0
-> because the reported average rate is censored at the monthly observation
-> frequency and already moves nearly every month.
+> **The size margin obeys the menu-cost law almost exactly. The frequency margin
+> does not respond at all** — the structural echo of Finding 1. Frequency looks
+> flat because the reported rate is a monthly mean that already moves nearly
+> every month; there is no room for it to move "more often"
+> (`11_chart11_scaling_law.png`).
 
-**Closing the loop (Table 10).** Feeding each category's *model-calibrated* τ\*
-through the P2 simulator on the test window yields 10–14 repricings and 5.7–7.2%
-mean real-price deviation — within a point of the empirical-knee τ = 6% result,
-and far better than observed pricing (25 changes, 10–15% deviation). The
-theory-derived and data-derived thresholds agree.
+**Closing the loop.** Feed each category's *model-calibrated* τ\* back through the
+backtest: 10–14 price changes and a 5.7–7.2% real-price gap — within a point of
+the data-derived τ = 6% result. **Theory and data land in the same place.**
 
 ---
 
-## 7 · The recommended rule (Chart 9)
+## 11 · The recommended rule (Chart 9)
 
-> **Each month**, compute cumulative CPI inflation since your last price change
-> (`CUMINF`).
+> **Each month, add up CPI inflation since your last price change (`CUMINF`).**
 >
-> * **`CUMINF` < τ\*** — τ\* ≈ **6%** (4–7% band; top of the band for 4–5★):
->   **hold** the price. No repricing review.
-> * **`CUMINF` ≥ τ\***: **trigger a repricing review** and reset the list price to
->   restore the target *real* rate (multiply by CPI since the last change).
-> * At the reset, **tilt by demand** (optional lever): occupancy above its
->   seasonal norm → fuller pass-through (× 1.00–1.05); at norm → inflation-matched
->   (× 1.00); below norm → partial (× 0.95–1.00). *In this data the tilt did not
->   improve out-of-sample real-price control.*
+> * **`CUMINF` below ~6%** (a 4–7% band; use the top of the band for 4–5★):
+>   **hold.** No repricing review.
+> * **`CUMINF` at or above ~6%:** **reset the list price** to restore the target
+>   *real* rate — i.e. multiply the old price by the CPI increase since the last
+>   change.
+> * **Optional tilt at the reset:** occupancy running above its seasonal norm →
+>   pass through a little extra (×1.00–1.05); at norm → match inflation (×1.00);
+>   below norm → hold back a little (×0.95–1.00). *In this data the tilt did not
+>   improve real-price control out of sample — treat it as a discretionary
+>   lever.*
 
-Backtested (2024-01 … 2026-05, out-of-sample): this would have **cut the number
-of price changes roughly in half versus repricing every month**, held the real
-room rate within **~6% of target** (versus **~11%** for what Buenos Aires hotels
-actually did), and left revenue essentially unchanged — and it holds across the
-robustness matrix.
+Backtested out-of-sample (2024-01 … 2026-05): this would have **cut the number of
+price changes roughly in half versus repricing every month**, held the real room
+rate within **~6% of target** (vs **~11%** for what hotels actually did), and
+left revenue essentially unchanged — and it survives the full robustness matrix.
 
-In low-inflation periods (≲ 2%/mo) the trigger fires every 2–3 months and a
-simple CPI reset suffices; as inflation accelerates it approaches monthly, which
-is when the level-restoring reset (rather than P1's increment-adding) matters
-most.
+In calm periods (≲ 2%/month) the trigger fires every 2–3 months and a plain CPI
+reset is enough. As inflation accelerates it approaches monthly — and that is
+exactly when *resetting to the real target* (rather than adding last month's
+increment) earns its keep.
 
 ---
 
-## 8 · Limitations
+## 12 · What this does **not** do
 
-1. **Aggregate data.** City × category × month. This is a *category-level*
-   pricing policy, not individual-hotel dynamic pricing / yield management.
+1. **Aggregate data.** City × category × month — this is a *category-level*
+   pricing policy, not individual-hotel yield management.
 2. **No official CPI before 2016-12.** The 2008–2017 stretch is nominal-only
-   context; the main sample is ≈ 77 clean months per category — small for
-   fine-grained regime splits (the mid-regime pass-through point estimate in
-   Table 2 is imprecise; only the low ≈ 0 / high > 0 pattern is interpretable).
-3. **Occupancy elasticity is not causally identified.** Instruments are weak or
-   invalid; the relative-price panel gives ≈ 0. Policy results are reported
+   context; the working sample is ≈ 77 clean months per category — small for
+   fine regime splits (only the "low ≈ 0 vs high > 0" pass-through pattern is
+   interpretable, not the mid-regime point estimate).
+3. **The demand elasticity is not causally identified.** Results are reported
    across an assumed β grid and are near-invariant to it, but a genuine causal
-   elasticity would need a supply/cost instrument that is not available here.
-4. **No marginal-cost data.** This is a revenue/real-price *trade-off* study, not
-   profit maximisation. The constant-elasticity revenue optimum is degenerate
-   (monotone in price) and is not used.
-5. **Repricing *frequency* is only weakly observable** — `average_rate` is a
-   category mean, so it moves most months regardless. The magnitude, asymmetry,
-   pass-through and threshold results do not depend on the frequency measure.
-6. **COVID 2020-21.** The category room-rate series is `///` for 22 of 24 months,
-   so no price-based estimate can include it — a "COVID dummy" cannot help
-   because `Δln P` is itself missing. The recommended rule is *simulated* through
-   the collapse (§6.8-F, notebook 04): it holds the real price within ~5% of
-   target and does not break, but it is **validated for inflation regimes, not
-   demand-collapse regimes**, and it is inflation-state-dependent only — it has
-   **no branch that cuts the price when occupancy craters** (a hotel might want a
-   discretionary promotional cut for cash-flow reasons the model does not
-   capture; given inelastic demand a mechanical cut would not recover occupancy).
+   number would need a supply/cost instrument this data does not provide.
+4. **No marginal-cost data.** This is a revenue / real-price **trade-off** study,
+   not profit maximisation. The constant-elasticity revenue "optimum" is
+   degenerate and is not used. In the menu-cost calibration (§10.2) only the
+   *ratio* κ/b (fixed cost ÷ loss curvature, ≈ 0.0002–0.0012 months) is
+   identified, not κ and b separately; a literature-plausible menu cost of ~2% of
+   monthly revenue implies a loss curvature b ≈ 20–100 — a steep penalty for
+   off-market real pricing, consistent with an OTA-mediated market.
+5. **Repricing *frequency* is only weakly observable** — the rate is a monthly
+   mean. The size, direction, pass-through and threshold results do not depend
+   on the frequency measure.
+6. **COVID 2020–21.** Star-tier rates are missing for 22 of 24 months, so no
+   price-based estimate can include it. The rule is *simulated* through the
+   collapse and holds the real price, but it is **validated for inflation
+   regimes, not demand-collapse regimes**, and has **no price-cut branch** for a
+   demand shock (a hotel might still want a discretionary promotional cut for
+   cash-flow reasons the model does not capture; with inelastic demand a
+   mechanical cut would not recover occupancy).
 7. **The composite "Total"** is a capacity-weighted construction with quarterly
-   weights, not an INDEC/EHOBA series.
-8. **`λ` in the objective** is an operational dial, not a calibrated monetary
-   repricing cost; the Pareto frontier is the more defensible object and the λ
-   sweep is reported in full.
-9. **Hotel prices are a component of the CPI** used as deflator/regressor, but at
-   ~1% of the headline index and as a different price concept (fixed-sample rack
-   rates vs reported ADR); the contaminated "Restaurants & hotels" division was
-   removed from the instrument set.
+   weights, not an official series.
+8. **The repricing penalty `λ`** is an operational dial, not a measured cost. The
+   frontier and the full λ sweep are the defensible objects; τ ≈ 6% is where any
+   moderate penalty points.
+9. **Hotel prices are ~1% of the CPI** used as deflator — immaterial, and a
+   different price concept (mean ADR vs fixed-basket). The "Restaurants & hotels"
+   CPI sub-index, which mechanically contains hotel prices, was **removed** from
+   the instrument set.
 
 ---
 
-## 9 · Reproducibility
+## 13 · Reproduce it
 
 ```bash
 python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 python -m ipykernel install --user --name argentina-hotels --display-name "Python (argentina-hotels)"
-# run from the repository root:
+# run from the repository root, in order:
 jupyter nbconvert --to notebook --execute --inplace \
-    --ExecutePreprocessor.kernel_name=argentina-hotels [0-9]*.ipynb        # 01 -> 06, ~25 s
+    --ExecutePreprocessor.kernel_name=argentina-hotels [0-9]*.ipynb        # 01 -> 07, ~30 s
 ```
 
 * `data/raw/**` is never modified. `data/processed/**` is git-ignored and fully
   regenerated by notebook 01.
 * Every cleaning / modelling decision is appended to
   `data/processed/cleaning_audit_log.csv` (idempotent per notebook).
-* Core logic is in `src/` (`config`, `common`, `loaders`, `policies`, `pricing_eval`), not
-  buried in notebooks. `src/policies.py` and `src/pricing_eval.py` are pure and
-  independently testable.
+* Core logic is in `src/` (`config`, `common`, `loaders`, `policies`,
+  `pricing_eval`), not buried in notebooks. `policies.py` and `pricing_eval.py`
+  are pure and independently testable.
 
-### Notebook map (six consolidated notebooks; run in order from the repo root)
+### Notebook map (run in order from the repo root)
 
-| notebook | brief part(s) | key outputs |
+| notebook | what it does | key outputs |
 |---|---|---|
-| `01_build_dataset` | data | `data/processed/*.parquet`, `data_dictionary.csv`, INDEC cross-check, `01_loaded/` |
-| `02_inflation_and_repricing` | 1, 2, 7 | Charts 1–4, erosion clock, sample map; Tables 1–3; `regime_tests.csv`, `price_adjustment_by_category.csv` |
-| `03_demand_and_identification` | 3 | Table 4, `identification_summary.csv`, Chart 5, `06_identification.png` |
-| `04_policies_and_backtest` | 4, 5, 6 | Tables 5–6, `pareto_frontier.csv`, `lambda_sweep.csv`, `covid_stress.csv`, Charts 7–8, `07_revenue_curves` |
-| `05_synthesis_menucost_and_rule` | 8, 10 + theory | Table 7 & Chart 6 (heterogeneity); Tables 8–10, Charts 10–11 (Sheshinski–Weiss (s, S) calibration + scaling-law test); decision-tree Chart 9 |
-| `06_robustness` | 9 | `robustness_matrix.csv`, `robustness_regime.csv`, COVID-inclusion note |
+| `01_build_dataset` | load · clean · merge the six spreadsheets into one panel | `data/processed/*.parquet`, `data_dictionary.csv`, INDEC cross-check |
+| `02_data_overview` | orientation / EDA — coverage & gaps, the series, the inflation environment, **annual-inflation table**, **Argentina vs India**, **currency-erosion stat**, seasonality, category comparison | `annual_inflation.csv`, `currency_erosion.csv`, `02_*.png` |
+| `03_inflation_and_repricing` | the descriptive story + Finding 1 + pass-through | Charts 1–4, erosion clock; Tables 1–3; `regime_tests.csv`, `price_adjustment_by_category.csv` |
+| `04_demand_and_identification` | Finding 2 — elasticity and why it isn't identified | Table 4, `identification_summary.csv`, Chart 5 |
+| `05_policies_and_backtest` | the policy engine, the frontier, the out-of-sample backtest, the COVID stress test | Tables 5–6, `pareto_frontier.csv`, `lambda_sweep.csv`, `covid_stress.csv`, Charts 7–8 |
+| `06_synthesis_menucost_and_rule` | one rule per category + the Sheshinski–Weiss (s, S) foundation and its scaling-law test | Table 7 & Chart 6; Tables 8–10, Charts 10–11; decision-tree Chart 9 |
+| `07_robustness` | eight variants + the COVID-inclusion note | `robustness_matrix.csv`, `robustness_regime.csv` |
 
 ### Tables (`outputs/tables/`)
 
@@ -596,25 +560,34 @@ jupyter nbconvert --to notebook --execute --inplace \
 `table4_elasticity` · `table5_threshold_sim` · `table6_out_of_sample` ·
 `table7_category_policy` · `table8_menu_cost_calibration` ·
 `table9_scaling_law` · `table10_model_tau_backtest` — plus
-`price_adjustment_by_category`, `regime_tests`, `identification_summary`,
-`pareto_frontier`, `lambda_sweep`, `robustness_matrix`, `robustness_regime`,
-`coverage_by_category`, `data_dictionary`, `missing_value_map`,
-`outlier_register`, `table_policy_example`.
+`annual_inflation`, `currency_erosion`, `price_adjustment_by_category`,
+`regime_tests`, `identification_summary`, `pareto_frontier`, `lambda_sweep`,
+`robustness_matrix`, `robustness_regime`, `coverage_by_category`,
+`data_dictionary`, `missing_value_map`, `outlier_register`,
+`table_policy_example`.
 
 ### Charts (`outputs/figures/`)
 
-1 `04_chart1_moving_target` — CPI vs hotel rates, 2008–2026
-2 `04_chart2_nominal_vs_real` — nominal vs real rates
-3 `05_chart3_magnitude_by_regime` — price-change size by inflation regime
-4 `05_chart4_frequency_by_regime` — frequency vs upward-share by regime
-5 `06_chart5_occupancy_tradeoff` — occupancy vs real rate, controls partialled out
-6 `09_chart6_category` — pass-through / knee-τ / repricing-cut by category
-7 `08_chart7_frontier` — the repricing frontier + knee
-8 `08_chart8_backtest` — dynamic repricing vs mechanical indexing, test window
-9 `09_chart9_decision_tree` — the rule
-10 `11_chart10_model_vs_empirical` — menu-cost model τ\* vs the fitted knee
-11 `11_chart11_scaling_law` — price-change size ∝ π^{1/3}, frequency does not
+**The story, in order:**
 
-Diagnostics: `03_indec_crosscheck`, `03_composite_check`, `04_erosion_clock`,
+1. `04_chart1_moving_target` — CPI vs hotel rates, 2008–2026
+2. `04_chart2_nominal_vs_real` — nominal vs real rates
+3. `05_chart3_magnitude_by_regime` — price-change size by inflation regime
+4. `05_chart4_frequency_by_regime` — frequency vs upward-share by regime
+5. `06_chart5_occupancy_tradeoff` — occupancy vs real rate, controls partialled out
+6. `09_chart6_category` — pass-through / knee-τ / repricing-cut by category
+7. `08_chart7_frontier` — the repricing frontier and its knee
+8. `08_chart8_backtest` — the threshold rule vs mechanical indexing, test window
+9. `09_chart9_decision_tree` — the recommended rule
+10. `11_chart10_model_vs_empirical` — menu-cost model τ\* vs the fitted knee
+11. `11_chart11_scaling_law` — price-change size ∝ π^(1/3); frequency does not
+
+**Orientation (notebook 02):** `02_coverage_heatmap`, `02_sample_map`,
+`02_nominal_rates_longrun`, `02_inflation_environment`, `02_real_rates`,
+`02_occupancy`, `02_price_change_dist`, `02_passthrough_scatter`,
+`02_capacity`, `02_correlations`, `02_argentina_vs_india_inflation`,
+`02_currency_erosion`.
+
+**Diagnostics:** `03_indec_crosscheck`, `03_composite_check`, `04_erosion_clock`,
 `04_sample_map`, `05_cumulative_passthrough`, `06_identification`,
 `07_revenue_curves`, `07_policy_paths_4star`, `08_frontier_robustness`.
