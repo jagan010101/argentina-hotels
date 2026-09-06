@@ -1,13 +1,26 @@
-# Buenos Aires hotel dynamic-pricing project
-# Python 3.12.  Pinned to the versions the notebooks were executed with.
+# When should a hotel change its price? — Python 3.12
+# Pinned to the versions the notebooks were executed with.
+
+# core
 pandas==3.0.1
 numpy==2.4.3
 pyarrow==23.0.1
-openpyxl==3.1.5
-xlrd==2.0.2            # required: sh_ipc_08_26.xls is legacy .xls (BIFF)
-matplotlib==3.10.8
+
+# spreadsheet I/O
+openpyxl==3.1.5          # .xlsx (EHOBA files)
+xlrd==2.0.2              # required: sh_ipc_08_26.xls is legacy .xls (BIFF)
+
+# econometrics
 statsmodels==0.14.6
+patsy==1.0.2             # formula interface used in notebooks 05 / 10
+linearmodels==7.0        # PanelOLS + IV2SLS in notebook 06
 scipy==1.17.1
-jupyter==1.1.1
-nbconvert==7.16.6
-ipykernel==6.31.0
+
+# figures
+matplotlib==3.10.8
+
+# notebook execution
+jupyter-core==5.9.1
+nbconvert==7.17.1
+nbclient==0.11.0
+ipykernel==7.2.0

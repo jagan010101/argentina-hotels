@@ -8,9 +8,12 @@ and backtests an **inflation-aware, state-dependent repricing rule** and
 compares it to doing nothing, to mechanical monthly CPI indexing, and to what
 hotels actually did.
 
-**Headline results & the recommended rule → [`FINDINGS.md`](FINDINGS.md).**
-Reframing history & method notes → [`PROJECT_AUDIT.md`](PROJECT_AUDIT.md).
-Source-data structure → [`DATA_AUDIT.md`](DATA_AUDIT.md).
+| document | contents |
+|---|---|
+| **[`REPORT.md`](REPORT.md)** | **full project report** — motivation, data, method, every result with numbers, the rule, limitations |
+| [`FINDINGS.md`](FINDINGS.md) | condensed findings + the recommended rule |
+| [`DATA_AUDIT.md`](DATA_AUDIT.md) | structural audit of the six raw government spreadsheets |
+| [`PROJECT_AUDIT.md`](PROJECT_AUDIT.md) | method-change log (this project was reframed from an earlier price/inflation correlation study) |
 
 ---
 
@@ -50,12 +53,15 @@ aggregate, not individual hotels.
 ## Repository
 
 ```
-data/raw/                     source spreadsheets (never modified)
-data/processed/               parquet panels + cleaning_audit_log.csv  (reproducible)
+REPORT.md  FINDINGS.md  DATA_AUDIT.md  PROJECT_AUDIT.md   documentation
+requirements.txt                                          pinned deps (Python 3.12)
 
-src/config.py                 paths, windows, threshold/λ/β grids, split
+data/raw/                     source spreadsheets (never modified, read-only)
+data/processed/               parquet panels + cleaning_audit_log.csv  (git-ignored, reproducible)
+
+src/config.py                 paths, windows, threshold/λ/β grids, backtest split
 src/common.py                 parsing helpers + idempotent audit log
-src/policies.py               repricing-policy engine  (P0/P1/P2/P3; t-1 info set)
+src/policies.py               repricing-policy engine  (P0/P1/P2/P3; strict t-1 info set)
 src/pricing_eval.py           policy scoring, λ-objective, Pareto frontier
 
 notebooks/
@@ -71,12 +77,13 @@ notebooks/
   09_heterogeneity_and_policy      Parts 8 & 10 — Table 7, Chart 6, decision tree (Chart 9)
   10_robustness                    Part 9  — robustness matrix
 
-outputs/figures/   Charts 1-9 + diagnostics (200 dpi PNG)
-outputs/tables/    Tables 1-7 + supporting CSVs
+outputs/figures/   Charts 1-9 + diagnostics (18 PNG @ 200 dpi)
+outputs/tables/    Tables 1-7 + supporting CSVs (19 files)
 ```
 
 Core logic (the policy engine and its scoring) lives in `src/policies.py` and
-`src/pricing_eval.py`, not in the notebooks.
+`src/pricing_eval.py`, not in the notebooks. `linearmodels` and `patsy` are
+required (notebooks 06 and 05/10).
 
 ## Reproduce
 

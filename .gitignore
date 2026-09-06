@@ -14,5 +14,3 @@ data/processed/
 # Keep: data/raw/**, outputs/**, notebooks/**, src/**
 !data/raw/
 
-# user-provided snapshot, not version-controlled
-Archive.zip
