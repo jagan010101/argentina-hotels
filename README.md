@@ -5,8 +5,10 @@ room rates when inflation is high. Chain of interest:
 
 > inflation → nominal room rate → occupancy → revenue
 
-**Status:** data pipeline complete (notebooks 01–03). Modelling (04–08) pending
-sign-off on the notebook-03 checkpoint. Nothing causal is claimed yet.
+**Status:** complete end-to-end (notebooks 01–09). Full pipeline reproduces from
+`data/raw/` in ~1.5 min. Headline results and the recommended rule are in
+[`FINDINGS.md`](FINDINGS.md) and notebook 09. No causal elasticity is claimed —
+see notebook 06b for what the data can and cannot identify.
 
 ---
 
@@ -48,11 +50,20 @@ data/raw/*.xlsx,*.xls
    │  notebooks/03_merge_data.ipynb     CPI merge, inflation, real rates, seasonality,
    │                                    COVID flags, capacity as-of, revenue proxy
    ▼                                    → data/processed/03_analysis_panel.parquet  + checkpoint diagnostics
-notebooks/04_descriptive_analysis.ipynb   (pending)
-notebooks/05_price_adjustment.ipynb       (pending)  price-change frequency / magnitude / pass-through
-notebooks/06_elasticity.ipynb             (pending)  occupancy response to real rate
-notebooks/07_dynamic_pricing.ipynb        (pending)  demand model + counterfactual optimal price
-notebooks/08_backtest.ipynb               (pending)  repricing rules, out-of-sample
+notebooks/04_descriptive_analysis.ipynb   Plots 1–9, Table 1, COVID shading
+notebooks/05_price_adjustment.ipynb       price-change distribution, regression pass-through
+                                          (Table 2), inflation regimes, Chart B
+notebooks/06_elasticity.ipynb             occupancy vs real rate: log-log / lag / levels /
+                                          logit specs (Table 3), endogeneity discussion, Chart C
+notebooks/06b_identification.ipynb        YoY-diff / relative-price panel / 2SLS / predetermined-
+                                          lag attempts at a causal elasticity
+notebooks/07_dynamic_pricing.ipynb        constant-elasticity demand, degenerate revenue optimum,
+                                          policy paths A/B/C/D, Charts D & E
+notebooks/08_backtest.ipynb               no-look-ahead backtest of repricing rules
+                                          (train<=2019 / val 2022 / test 2023-26), Tables 4 & 5,
+                                          repricing-frequency trade-off, Chart F
+notebooks/09_results_and_recommendation.ipynb   Tables 1–5 + Charts A–F assembled,
+                                          Part-14 economic interpretation, the recommended rule
 ```
 
 Shared config and parsing helpers: `src/config.py`, `src/common.py` (imported by
@@ -66,18 +77,30 @@ pip install -r requirements.txt
 python -m ipykernel install --user --name argentina-hotels --display-name "Python (argentina-hotels)"
 jupyter nbconvert --to notebook --execute --inplace \
     --ExecutePreprocessor.kernel_name=argentina-hotels \
-    notebooks/01_load_data.ipynb notebooks/02_clean_data.ipynb notebooks/03_merge_data.ipynb
+    notebooks/0*.ipynb          # runs 01 → 09 in order (~1.5 min)
 ```
+
+Or open the notebooks in Jupyter and run top-to-bottom; each reads the parquet
+outputs of the previous one from `data/processed/`.
 
 Every cleaning decision is appended to `data/processed/cleaning_audit_log.csv`
 (idempotent per notebook). Outputs land in `outputs/figures/` and `outputs/tables/`.
 
-## Outputs so far
+## Outputs
 
-`outputs/tables/`: `data_dictionary.csv`, `missing_value_map.csv`,
-`coverage_by_category.csv`, `outlier_register.csv`, `table1_descriptives.csv`.
-`outputs/figures/`: `03_indec_crosscheck.png`, `03_nominal_vs_real.png`,
-`03_occ_vs_realrate_raw.png`.
+`outputs/tables/` (14 CSVs): `data_dictionary`, `missing_value_map`,
+`coverage_by_category`, `outlier_register`, `table1_descriptives`,
+`price_adjustment_stats`, `table2_passthrough`, `passthrough_by_regime`,
+`table3_elasticity`, `elasticity_robustness`, `identification_summary`,
+`table4_policy_comparison`, `table5_out_of_sample`, `backtest_robustness`.
+
+`outputs/figures/` (24 PNGs @ 200 dpi): Plots 1–9 (`04_*`), presentation
+Charts A–F (`09_chartA`, `05_chartB`, `06_chartC`, `07_chartD`,
+`08_chartE`, `08_chartF`), plus diagnostic figures for each stage.
+
+`data/processed/`: `01_loaded/*.parquet` (raw tables, tidy), `02_panel_long`,
+`02_capacity_quarterly`, `02_cpi_monthly`, `03_analysis_panel` (the modelling
+table), and `cleaning_audit_log.csv` (every transformation, idempotent per notebook).
 
 ## Limitations (running list)
 
