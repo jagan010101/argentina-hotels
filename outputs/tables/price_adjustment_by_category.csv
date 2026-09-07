@@ -1,7 +1,0 @@
-hotel_category,label,n,freq_change_gt_0p1pct,freq_change_gt_1pct,share_up,mean_abs_change_pct,median_abs_change_pct,mean_pos_change_pct,mean_neg_change_pct,p90_change_pct,p10_change_pct,share_change_gt_cpi,share_change_lt_cpi
-apart,Apart-hotel,73,0.973,0.877,0.822,9.146,6.757,8.733,-11.051,15.841,-5.206,0.493,0.493
-boutique,Boutique,73,1.0,0.959,0.767,7.549,6.032,8.505,-4.399,15.136,-3.792,0.589,0.397
-stars_1_2,1-2 star,61,0.984,0.934,0.803,6.712,5.014,6.963,-5.688,11.706,-2.203,0.475,0.508
-stars_3,3 star,73,0.986,0.904,0.74,8.136,6.071,9.426,-4.471,18.957,-3.188,0.493,0.493
-stars_4,4 star,73,1.0,0.904,0.795,7.584,6.023,8.567,-3.781,15.879,-2.874,0.534,0.452
-stars_5,5 star,73,1.0,0.945,0.644,10.563,7.867,12.35,-7.332,17.236,-9.171,0.466,0.521
