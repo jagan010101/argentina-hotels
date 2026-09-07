@@ -7,7 +7,7 @@ decision date. INDEC releases month-t CPI in mid-month t+1, so a month-t price
 may use CPI through **t-1** only.  All functions here are pure (no plotting, no
 IO) so they can be unit-tested and called from any notebook.
 
-Policies implemented (PROJECT_AUDIT.md sec 5, brief Part 4):
+Policies implemented (see REPORT.md sec 7):
     policy0_frozen            nominal price never changes            -> real erosion reference
     policy1_monthly_cpi       index every month by last month's CPI  -> mechanical benchmark
     policy2_threshold(tau)    hold until cumulative inflation since the last change

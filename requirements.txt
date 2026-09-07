@@ -12,8 +12,8 @@ xlrd==2.0.2              # required: sh_ipc_08_26.xls is legacy .xls (BIFF)
 
 # econometrics
 statsmodels==0.14.6
-patsy==1.0.2             # formula interface used in notebooks 05 / 10
-linearmodels==7.0        # PanelOLS + IV2SLS in notebook 06
+patsy==1.0.2             # formula interface (notebooks 03 / 07)
+linearmodels==7.0        # PanelOLS + IV2SLS (notebook 04 identification)
 scipy==1.17.1
 
 # figures

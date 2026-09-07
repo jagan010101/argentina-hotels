@@ -3,7 +3,7 @@ Central configuration for the Buenos Aires hotel dynamic-pricing project.
 
 Every path, constant, category map, and modelling-window decision lives here so
 the numbered pipeline scripts stay thin and the assumptions are auditable in one
-place. See DATA_AUDIT.md sections 5, 9 and 10 for the rationale behind each value.
+place. The rationale for each value is documented inline and in REPORT.md §3.
 """
 from __future__ import annotations
 
@@ -104,18 +104,21 @@ COMPOSITE_TOTAL = "total_composite"
 PRESENT_CATEGORIES = CORE_CATEGORIES + [COMPOSITE_TOTAL]   # for the headline story
 
 # --------------------------------------------------------------------------- #
-# Sample windows & structural-break dates  (see PROJECT_AUDIT.md sec 4-5)
+# Sample windows & structural-break dates  (see REPORT.md sec 3.3)
 # --------------------------------------------------------------------------- #
 # CPI coverage bound (GBA IPC via the dic-2016 bridge starts 2016-04)
 CPI_MIN_DATE = "2016-04-01"
-DATA_END = "2026-05-01"
+# Sample end: last fully-published month. EHOBA rates for 2025-12 and 2026-01 are
+# absent and everything from 2025-12 is provisional, so the whole project stops
+# at 2025-11 rather than straddle that gap. (Raw data runs to 2026-05.)
+DATA_END = "2025-11-01"
 
 # Long-run *nominal-only* context (never CPI-deflated below this only for plots)
 LONGRUN_START = "2008-01-01"
 
 # Main analysis sample: pre-COVID normal + post-COVID, COVID handled separately.
 ANALYSIS_SEGMENTS = [("2018-01-01", "2019-12-01"),
-                     ("2022-01-01", "2026-05-01")]
+                     ("2022-01-01", DATA_END)]
 
 # COVID structural break: hard data hole + kept entirely out of the main sample
 COVID_START = "2020-01-01"
@@ -125,12 +128,12 @@ COVID_HOLE_END = "2021-12-01"
 # retained for backward compat with earlier notebooks
 COVID_RECOVERY_START = "2022-01-01"
 COVID_RECOVERY_END = "2022-12-01"
-WINDOW_START, WINDOW_END = "2018-01-01", "2026-05-01"
+WINDOW_START, WINDOW_END = "2018-01-01", DATA_END
 
-# Temporal backtest split (PROJECT_AUDIT.md sec 4)
+# Temporal backtest split (see REPORT.md sec 3.3 / sec 8)
 TRAIN_SEGMENTS = [("2018-01-01", "2019-12-01"), ("2022-01-01", "2022-12-01")]
 VALID_SEGMENT = ("2023-01-01", "2023-12-01")
-TEST_SEGMENT = ("2024-01-01", "2026-05-01")
+TEST_SEGMENT = ("2024-01-01", DATA_END)
 
 # --------------------------------------------------------------------------- #
 # Repricing-policy parameters
@@ -159,7 +162,7 @@ REGIME_LABELS = ["low", "mid", "high"]
 CPI_BASE_LABEL = "dic-2016 = 100"
 
 # --------------------------------------------------------------------------- #
-# CPI sheet structure (DATA_AUDIT.md sec 9)
+# CPI sheet structure (INDEC sh_ipc workbook; see 01_build_dataset load section)
 # --------------------------------------------------------------------------- #
 CPI_SHEET_INDEX = "Índices IPC Cobertura Nacional"
 CPI_SHEET_MOM = "Variación mensual IPC Nacional"

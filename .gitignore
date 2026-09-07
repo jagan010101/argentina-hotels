@@ -5,12 +5,22 @@ __pycache__/
 .venv/
 venv/
 
-# Processed data is reproducible from data/raw + notebooks
+# Reproducible from data/raw + notebooks
 data/processed/
+airbnb/data/processed/
+outputs/
+airbnb/outputs/
 
 # OS
 .DS_Store
 
-# Keep: data/raw/**, outputs/**, notebooks/**, src/**
+# Keep: data/raw/**, notebooks/**, src/**
 !data/raw/
 
+# ...except the Inside Airbnb scrapes (~1.4 GB; re-downloadable from insideairbnb.com)
+data/raw/airbnb/
+
+# Scratch / editor
+*.tmp
+.idea/
+.vscode/
